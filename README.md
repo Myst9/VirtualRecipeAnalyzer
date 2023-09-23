@@ -1,1 +1,1 @@
-# VirtualRecipeAnalyzer
+# Virtual Recipe Analyzer
