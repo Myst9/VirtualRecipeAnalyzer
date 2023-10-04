@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import Logout from './pages/Logout';
 import Error from './pages/Error';
+import Recipes from './pages/Recipes';
 import './App.css';
 
 import { Container } from 'react-bootstrap';
@@ -52,7 +53,7 @@ export default function App() {
         <Container>
           <Routes>
             <Route path="/" element={<Home />} />
-            
+            <Route path="/recipes" element={<Recipes />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/logout" element={<Logout />} />
