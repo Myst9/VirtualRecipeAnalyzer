@@ -29,6 +29,8 @@ export default function Recipes() {
     { name: 'Bread, white', imageUrl: 'bread.jpg' },
   ]);
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const handleIngredientSelect = (ingredient) => {
     setIngredientToSelect(ingredient);
   };
@@ -75,17 +77,43 @@ export default function Recipes() {
       });
   };
 
+  const filteredIngredients = ingredients.filter((ingredient) =>
+    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="recipe-container">
       <div className="ingredients-container" style={{ display: 'flex' }}>
         <div className="ingredients-section" style={{ flex: 1 }}>
           <h2>Ingredients</h2>
-          <div className="ingredient-list" style={{ width: '300px', maxHeight: '600px', overflowY: 'scroll' }}>
-            {ingredients.map((ingredient, index) => (
+          <div className="ingredient-search">
+            <input
+              type="text"
+              placeholder="Search ingredients"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={() => setSearchQuery('')}
+              style={{
+                backgroundColor: '#007bff', // Change the color to match your design
+                color: 'white',
+                borderRadius: '4px',
+                padding: '2px 10px',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                marginLeft: '10px',
+              }}
+            >Clear</button>
+          </div>
+          <div className="ingredient-list" style={{ width: '300px', maxHeight: '550px', overflowY: 'scroll' }}>
+            {filteredIngredients.map((ingredient, index) => (
               <div
                 key={index}
-                className={`ingredient-card ${selectedIngredients.find((item) => item.name === ingredient.name) ? 'selected' : ''
-                  }`}
+                style={{ padding: '5px' }}
+                className={`ingredient-card ${selectedIngredients.find((item) => item.name === ingredient.name) ? 'selected' : ''}`}
                 onClick={() => handleIngredientSelect(ingredient)}
               >
                 <img
@@ -93,7 +121,7 @@ export default function Recipes() {
                   alt={ingredient.name}
                   style={{ maxWidth: '100px', maxHeight: '100px' }}
                 />
-                <h3>{ingredient.name}</h3>
+                <h6>{ingredient.name}</h6>
               </div>
             ))}
           </div>
@@ -105,17 +133,50 @@ export default function Recipes() {
             {selectedIngredients.map((ingredient, index) => (
               <div key={index} className="selected-ingredient">
                 <img
-                  src={ingredient.imageUrl} 
+                  src={ingredient.imageUrl}
                   alt={ingredient.name}
                   style={{ maxWidth: '100px', maxHeight: '100px' }}
                 />
-                <span>{ingredient.name} - {ingredient.quantity} g</span>
-                <button onClick={() => handleRemoveIngredient(ingredient.name)}>Remove</button>
+                <button
+                  className="remove-button"
+                  onClick={() => handleRemoveIngredient(ingredient.name)}
+                  style={{
+                    backgroundColor: 'red',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'inline-block',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    outline: 'none',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    marginLeft: '10px',
+                    border: 'none', // Added to remove button border
+                  }}
+                >
+                  X
+                </button>
+                <h6>{ingredient.name} - {ingredient.quantity} g</h6>
               </div>
             ))}
           </div>
           <div className="analysis-section">
-            <button onClick={handleAnalyzeRecipe} disabled={selectedIngredients.length === 0}>
+            <button onClick={handleAnalyzeRecipe} disabled={selectedIngredients.length === 0}
+              style={{
+                backgroundColor: selectedIngredients.length === 0 ? '#ccc' : '#007bff', // Change button color when disabled
+                color: 'white',
+                borderRadius: '4px', // Added border radius for a rounded look
+                padding: '10px 20px', // Added padding for better button size
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
               Analyze Recipe
             </button>
           </div>
@@ -164,8 +225,33 @@ export default function Recipes() {
           }}
         />
         <div>
-          <button onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}>Add</button>
-          <button onClick={() => setIngredientToSelect(null)}>Cancel</button>
+          <button onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            }}
+          >Add</button>
+          <button onClick={() => setIngredientToSelect(null)}
+            style={{
+              backgroundColor: '#ccc',
+              color: '#007bff',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              marginLeft: '10px',
+            }}
+          >Cancel</button>
         </div>
       </Modal>
     </div>
