@@ -15,32 +15,25 @@ const modalStyles = {
   },
 };
 
-// let imageNames = [];
-
-// fetch("http://localhost:4000/recipes/get-images")
-//   .then(response => {
-//     if (!response.ok) {
-//       throw new Error('Network response was not ok');
-//     }
-//     return response.json(); 
-//   })
-//   .then(data => {
-
-//     imageNames = data;
-
-//     console.log(imageNames);
-//   })
-//   .catch(error => {
-//     console.error('There was a problem with the fetch operation:', error);
-//   });
-
-
 export default function Recipes() {
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [ingredientToSelect, setIngredientToSelect] = useState(null);
   const [nutritionalDetails, setNutritionalDetails] = useState(null);
   const [bowlImages, setBowlImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
+  useEffect(() => {
+    const storedIngredients = JSON.parse(localStorage.getItem('selectedIngredients'));
+    if (storedIngredients && selectedIngredients.length === 0) {
+      setSelectedIngredients(storedIngredients);
+    }
+  }, []);
+
+  useEffect(() => {
+    const storedDetails = JSON.parse(localStorage.getItem('nutritionalDetails'));
+    if (storedDetails) {
+      setNutritionalDetails(storedDetails);
+    }
+  }, []);
 
 useEffect(() => {
   fetch("http://localhost:4000/recipes/get-images")
@@ -51,7 +44,7 @@ useEffect(() => {
       return response.json(); 
     })
     .then(data => {
-      setIngredients(data); // Set the state with the fetched data
+      setIngredients(data); 
       console.log(ingredients);
     })
     .catch(error => {
@@ -105,7 +98,8 @@ useEffect(() => {
       .then((response) => response.json())
       .then((data) => {
         setNutritionalDetails(data);
-        setIsAnalyzing(false);
+        localStorage.setItem('nutritionalDetails', JSON.stringify(data));
+        setTimeout(() => setIsAnalyzing(false), 4000);
       })
       .catch((error) => {
         console.error(error);
@@ -116,6 +110,11 @@ useEffect(() => {
   const filteredIngredients = ingredients.filter((ingredient) =>
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    // Save selected ingredients to localStorage whenever it changes
+    localStorage.setItem('selectedIngredients', JSON.stringify(selectedIngredients));
+  }, [selectedIngredients]);
 
   return (
     <div className="recipe-container">
