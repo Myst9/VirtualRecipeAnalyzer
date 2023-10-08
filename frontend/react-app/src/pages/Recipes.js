@@ -30,6 +30,7 @@ export default function Recipes() {
   ]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleIngredientSelect = (ingredient) => {
     setIngredientToSelect(ingredient);
@@ -51,11 +52,15 @@ export default function Recipes() {
   };
 
   const handleRemoveFromBowl = (imageId) => {
-    const updatedBowlImages = bowlImages.filter((bowlImage) => bowlImage.imageId !== imageId);
+    const updatedBowlImages = bowlImages.filter(
+      (bowlImage) => bowlImage.imageId !== imageId
+    );
     setBowlImages(updatedBowlImages);
   };
 
   const handleAnalyzeRecipe = () => {
+    setIsAnalyzing(true);
+
     const formattedIngredients = selectedIngredients.map(({ name, quantity }) => ({
       name,
       quantity,
@@ -71,9 +76,11 @@ export default function Recipes() {
       .then((response) => response.json())
       .then((data) => {
         setNutritionalDetails(data);
+        setIsAnalyzing(false);
       })
       .catch((error) => {
         console.error(error);
+        setIsAnalyzing(false);
       });
   };
 
@@ -93,9 +100,10 @@ export default function Recipes() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button onClick={() => setSearchQuery('')}
+            <button
+              onClick={() => setSearchQuery('')}
               style={{
-                backgroundColor: '#007bff', // Change the color to match your design
+                backgroundColor: '#007bff',
                 color: 'white',
                 borderRadius: '4px',
                 padding: '2px 10px',
@@ -106,14 +114,23 @@ export default function Recipes() {
                 fontSize: '16px',
                 marginLeft: '10px',
               }}
-            >Clear</button>
+            >
+              Clear
+            </button>
           </div>
-          <div className="ingredient-list" style={{ width: '300px', maxHeight: '550px', overflowY: 'scroll' }}>
+          <div
+            className="ingredient-list"
+            style={{ width: '300px', maxHeight: '550px', overflowY: 'scroll' }}
+          >
             {filteredIngredients.map((ingredient, index) => (
               <div
                 key={index}
                 style={{ padding: '5px' }}
-                className={`ingredient-card ${selectedIngredients.find((item) => item.name === ingredient.name) ? 'selected' : ''}`}
+                className={`ingredient-card ${
+                  selectedIngredients.find((item) => item.name === ingredient.name)
+                    ? 'selected'
+                    : ''
+                }`}
                 onClick={() => handleIngredientSelect(ingredient)}
               >
                 <img
@@ -154,22 +171,27 @@ export default function Recipes() {
                     fontWeight: 'bold',
                     fontSize: '16px',
                     marginLeft: '10px',
-                    border: 'none', // Added to remove button border
+                    border: 'none',
                   }}
                 >
                   X
                 </button>
-                <h6>{ingredient.name} - {ingredient.quantity} g</h6>
+                <h6>
+                  {ingredient.name} - {ingredient.quantity} g
+                </h6>
               </div>
             ))}
           </div>
           <div className="analysis-section">
-            <button onClick={handleAnalyzeRecipe} disabled={selectedIngredients.length === 0}
+            <button
+              onClick={handleAnalyzeRecipe}
+              disabled={selectedIngredients.length === 0}
               style={{
-                backgroundColor: selectedIngredients.length === 0 ? '#ccc' : '#007bff', // Change button color when disabled
+                backgroundColor:
+                  selectedIngredients.length === 0 ? '#ccc' : '#007bff',
                 color: 'white',
-                borderRadius: '4px', // Added border radius for a rounded look
-                padding: '10px 20px', // Added padding for better button size
+                borderRadius: '4px',
+                padding: '10px 20px',
                 border: 'none',
                 cursor: 'pointer',
                 outline: 'none',
@@ -183,7 +205,27 @@ export default function Recipes() {
         </div>
 
         <div className="nutritional-details" style={{ flex: 1 }}>
-          {nutritionalDetails && (
+          {isAnalyzing ? (
+            <div className="loading-message">
+              <Modal
+                isOpen={isAnalyzing}
+                onRequestClose={() => setIsAnalyzing(false)}
+                style={modalStyles}
+                contentLabel="Analyzing Recipe"
+              >
+                <img
+                  src="pan_gif.gif"
+                  alt="Bowl Animation"
+                  style={{
+                    maxWidth: '200px',
+                    maxHeight: '200px',
+                    animation: 'bowlAnimation 2s infinite',
+                  }}
+                />
+                <p>Analyzing Recipe...</p>
+              </Modal>
+            </div>
+          ) : nutritionalDetails ? (
             <div>
               <h2>Nutritional Details</h2>
               <table>
@@ -205,6 +247,11 @@ export default function Recipes() {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div>
+              <h2>Nutritional Details</h2>
+              <p>No nutritional details available.</p>
+            </div>
           )}
         </div>
       </div>
@@ -225,7 +272,8 @@ export default function Recipes() {
           }}
         />
         <div>
-          <button onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
+          <button
+            onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
             style={{
               backgroundColor: '#007bff',
               color: 'white',
@@ -237,8 +285,11 @@ export default function Recipes() {
               fontWeight: 'bold',
               fontSize: '16px',
             }}
-          >Add</button>
-          <button onClick={() => setIngredientToSelect(null)}
+          >
+            Add
+          </button>
+          <button
+            onClick={() => setIngredientToSelect(null)}
             style={{
               backgroundColor: '#ccc',
               color: '#007bff',
@@ -251,7 +302,9 @@ export default function Recipes() {
               fontSize: '16px',
               marginLeft: '10px',
             }}
-          >Cancel</button>
+          >
+            Cancel
+          </button>
         </div>
       </Modal>
     </div>
