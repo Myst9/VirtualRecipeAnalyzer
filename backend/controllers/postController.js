@@ -6,6 +6,7 @@ module.exports.addPost = (data) => {
 		let newPost = new Post({
 			userId: data.post.name,
 			title: data.post.title,
+			ingredients: data.post.ingredients,
 			description: data.post.description
 			
 		});

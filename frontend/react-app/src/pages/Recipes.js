@@ -60,10 +60,28 @@ useEffect(() => {
 
   const handleAddIngredient = (quantity) => {
     if (quantity !== null && quantity !== '') {
+    // Check if the ingredient is already in selectedIngredients
+    const existingIngredientIndex = selectedIngredients.findIndex(
+      (ingredient) => ingredient.name === ingredientToSelect.name
+    );
+
+    if (existingIngredientIndex !== -1) {
+      const updatedIngredients = [...selectedIngredients];
+      updatedIngredients[existingIngredientIndex].quantity = quantity;
+
+      setSelectedIngredients(updatedIngredients);
+    } else {
       const newIngredient = { ...ingredientToSelect, quantity };
       setSelectedIngredients([...selectedIngredients, newIngredient]);
-      setIngredientToSelect(null);
     }
+
+    setIngredientToSelect(null);
+  }
+  };
+
+  const clearNutritionalDetails = () => {
+  setNutritionalDetails(null); 
+  localStorage.removeItem('nutritionalDetails'); 
   };
 
   const handleRemoveIngredient = (ingredientName) => {
@@ -82,6 +100,7 @@ useEffect(() => {
 
   const handleClearAll = () => {
     setSelectedIngredients([]); 
+    clearNutritionalDetails();
   };
 
   const handleAnalyzeRecipe = () => {
