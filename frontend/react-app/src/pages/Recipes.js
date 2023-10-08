@@ -80,6 +80,10 @@ useEffect(() => {
     setBowlImages(updatedBowlImages);
   };
 
+  const handleClearAll = () => {
+    setSelectedIngredients([]); 
+  };
+
   const handleAnalyzeRecipe = () => {
     setIsAnalyzing(true);
 
@@ -228,6 +232,22 @@ useEffect(() => {
               }}
             >
               Analyze Recipe
+            </button>
+            <button
+              onClick={handleClearAll} 
+              style={{
+                backgroundColor: '#e63e3e', 
+                color: 'white',
+                borderRadius: '4px',
+                padding: '10px 20px',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
+              Clear All 
             </button>
           </div>
         </div>
