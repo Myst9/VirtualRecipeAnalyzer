@@ -2,11 +2,12 @@ const fs = require('fs');
 const path = require('path');
 const Recipe = require("../models/Recipe");
 
+const filePath = path.join(__dirname, '../data/FoodData_Central_survey_food_json_2022-10-28.json');
+const nutrientData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+const surveyFoods = nutrientData.SurveyFoods;
+
 module.exports.analyzeRecipe = async (data) => {
     try {
-        const filePath = path.join(__dirname, '../data/FoodData_Central_survey_food_json_2022-10-28.json');
-        const nutrientData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        const surveyFoods = nutrientData.SurveyFoods;
         const nutrientTotals = [];
         const ingredients = data.ingredients;
 
@@ -52,3 +53,21 @@ module.exports.analyzeRecipe = async (data) => {
     }
 };
 
+module.exports.getImages = async () => {
+    return new Promise((resolve, reject) => {
+        try {
+            let result = [];
+            for (const food of surveyFoods) {
+                const name = food.description;
+                const imageUrl = `${name}.jpg`;
+                result.push({
+                    name: name,
+                    imageUrl: imageUrl,
+                });
+            }
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 
 Modal.setAppElement('#root');
@@ -20,15 +20,37 @@ export default function Recipes() {
   const [ingredientToSelect, setIngredientToSelect] = useState(null);
   const [nutritionalDetails, setNutritionalDetails] = useState(null);
   const [bowlImages, setBowlImages] = useState([]);
-  const [ingredients] = useState([
-    { name: 'Milk, whole', imageUrl: 'milkjug.jpg' },
-    { name: 'Yogurt, low fat milk, plain', imageUrl: 'yogurt.jpg' },
-    { name: 'Cashews, unroasted', imageUrl: 'cashews.jpg' },
-    { name: 'Almonds, unroasted', imageUrl: 'almonds.jpg' },
-    { name: 'Pistachio nuts, salted', imageUrl: 'pistachios.jpg' },
-    { name: 'Bread, white', imageUrl: 'bread.jpg' },
-  ]);
+  const [ingredients, setIngredients] = useState([]);
+  useEffect(() => {
+    const storedIngredients = JSON.parse(localStorage.getItem('selectedIngredients'));
+    if (storedIngredients && selectedIngredients.length === 0) {
+      setSelectedIngredients(storedIngredients);
+    }
+  }, []);
 
+  useEffect(() => {
+    const storedDetails = JSON.parse(localStorage.getItem('nutritionalDetails'));
+    if (storedDetails) {
+      setNutritionalDetails(storedDetails);
+    }
+  }, []);
+
+useEffect(() => {
+  fetch("http://localhost:4000/recipes/get-images")
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); 
+    })
+    .then(data => {
+      setIngredients(data); 
+      console.log(ingredients);
+    })
+    .catch(error => {
+      console.error('There was a problem with the fetch operation:', error);
+    });
+}, []);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -58,6 +80,10 @@ export default function Recipes() {
     setBowlImages(updatedBowlImages);
   };
 
+  const handleClearAll = () => {
+    setSelectedIngredients([]); 
+  };
+
   const handleAnalyzeRecipe = () => {
     setIsAnalyzing(true);
 
@@ -76,7 +102,8 @@ export default function Recipes() {
       .then((response) => response.json())
       .then((data) => {
         setNutritionalDetails(data);
-        setIsAnalyzing(false);
+        localStorage.setItem('nutritionalDetails', JSON.stringify(data));
+        setTimeout(() => setIsAnalyzing(false), 4000);
       })
       .catch((error) => {
         console.error(error);
@@ -87,6 +114,11 @@ export default function Recipes() {
   const filteredIngredients = ingredients.filter((ingredient) =>
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  useEffect(() => {
+    // Save selected ingredients to localStorage whenever it changes
+    localStorage.setItem('selectedIngredients', JSON.stringify(selectedIngredients));
+  }, [selectedIngredients]);
 
   return (
     <div className="recipe-container">
@@ -200,6 +232,22 @@ export default function Recipes() {
               }}
             >
               Analyze Recipe
+            </button>
+            <button
+              onClick={handleClearAll} 
+              style={{
+                backgroundColor: '#e63e3e', 
+                color: 'white',
+                borderRadius: '4px',
+                padding: '10px 20px',
+                border: 'none',
+                cursor: 'pointer',
+                outline: 'none',
+                fontWeight: 'bold',
+                fontSize: '16px',
+              }}
+            >
+              Clear All 
             </button>
           </div>
         </div>

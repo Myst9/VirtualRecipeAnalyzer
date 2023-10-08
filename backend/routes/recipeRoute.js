@@ -12,4 +12,8 @@ router.post("/analyze-recipe", (req, res) => {
 		resultFromController));
 });
 
+router.get("/get-images", (req, res) => {
+	recipeController.getImages().then(resultFromController => res.send(resultFromController));
+});
+
 module.exports = router;
