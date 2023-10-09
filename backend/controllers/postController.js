@@ -1,33 +1,41 @@
 const Post = require("../models/Post");
 
-module.exports.addPost = (data) => {
+module.exports.addPost = async (data) => {
+  try {
+    const { userId, title, ingredients, description, image } = data;
 
-	
-		let newPost = new Post({
-			userId: data.post.name,
-			title: data.post.title,
-			ingredients: data.post.ingredients,
-			description: data.post.description
-			
-		});
+    console.log(ingredients);
 
-		return newPost.save().then((post, error) => {
+    let newPost = new Post({
+      userId,
+      title,
+      ingredients, 
+      description,
+      image: {
+        data: image.data, 
+        contentType: image.contentType, 
+      },
+    });
 
-			if(error){
-				return false;
-			} else {
-				return true;
-			}
-		})
-	
-
-	
+    const savedPost = await newPost.save();
+    return savedPost;
+  } catch (error) {
+    console.error(error);
+    throw error; 
+  }
 };
+
 
 module.exports.getAllPosts = () => {
 	return Post.find({}).then(result => {
 		return result;
 	});
+};
+
+module.exports.getPost = async (postId) => {
+  return Post.findById(postId).then(result => {
+  	return result;
+  })
 };
 
 
@@ -53,15 +61,13 @@ module.exports.deletePost = (data, reqParams) => {
     return Post.findByIdAndDelete(reqParams.postId)
       .then((post) => {
         if (!post) {
-          // Post with the given ID was not found.
           return false;
         }
-        // Post deleted successfully.
         return true;
       })
       .catch((error) => {
         console.error(error);
-        return false; // An error occurred during the deletion.
+        return false; 
       });
   
 

@@ -4,6 +4,26 @@
   box-sizing: border-box;
 }
 
+body {
+  margin: 0; /* Remove default body margin */
+  padding: 0; /* Remove default body padding */
+  background-image: url('../public/bg1.jpeg');
+  background-size: cover; /* Cover the entire page */
+  background-repeat: no-repeat; /* Prevent image repetition */
+  background-attachment: fixed; /* Fix the background image */
+}
+
+
 .cardHighlight {
   min-height: 100%;
 }
+
+.custom-toggler .navbar-toggler-icon {
+  background-color: #fff; 
+}
+
+.custom-navbar {
+  background-color: #132043;
+  
+}
+

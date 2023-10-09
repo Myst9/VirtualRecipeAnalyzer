@@ -24,6 +24,7 @@ module.exports.checkEmailExists = (reqBody) => {
 module.exports.registerUser = (reqBody) => {
 
 	let newUser = new User({
+		name: reqBody.name,
 		email: reqBody.email,
 		password: bcrypt.hashSync(reqBody.password, 10)
 	})

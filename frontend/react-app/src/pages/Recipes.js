@@ -5,8 +5,8 @@ Modal.setAppElement('#root');
 
 const modalStyles = {
   content: {
-    width: '300px',
-    height: '300px',
+    width: '350px',
+    height: '350px',
     margin: 'auto',
     display: 'flex',
     flexDirection: 'column',

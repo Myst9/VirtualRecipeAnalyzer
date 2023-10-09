@@ -16,4 +16,8 @@ router.get("/get-images", (req, res) => {
 	recipeController.getImages().then(resultFromController => res.send(resultFromController));
 });
 
+router.get("/ingredient-names", (req, res) => {
+	recipeController.getIngredients().then(resultFromController => res.send(resultFromController));
+});
+
 module.exports = router;

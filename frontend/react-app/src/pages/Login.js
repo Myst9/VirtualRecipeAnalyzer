@@ -1,8 +1,10 @@
 import { Form, Button } from 'react-bootstrap';
 import { useState, useEffect, useContext } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
+import { Container, Card, Row, Col } from 'react-bootstrap';
 import UserContext from '../UserContext';
 import Swal from 'sweetalert2';
+import '../App.css';
 
 export default function Login(props){
 
@@ -92,11 +94,17 @@ export default function Login(props){
 	}, [ email, password ])
 
 	return (
-		(user.id !== null) ?
+	<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+	<Container >
+			<Row>
+				<Col lg={{span: 6, offset:3}} >
+					<Card>
+					      <Card.Body className="text-center">
+		{(user.id !== null) ? (
 			<Navigate to="/recipes" />
-		:
+		) : (
 			<Form onSubmit={(e) => authenticate(e)}>
-			<h1>Login Here</h1>
+			<h2>Login</h2>
 				<Form.Group controlId="userEmail">
 					<Form.Label>Email Address</Form.Label>
 					<Form.Control
@@ -126,5 +134,12 @@ export default function Login(props){
 				}
 							
 			</Form>
-	)
+			)}
+			</Card.Body>
+					</Card>
+				</Col>
+			</Row>
+		</Container>
+		</div>
+	);
 }
