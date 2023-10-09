@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card } from 'react-bootstrap';
 import { Container, Row, Col } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
 
 export default function PostDetails() {
   const [post, setPost] = useState(null);
