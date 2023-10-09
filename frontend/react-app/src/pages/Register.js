@@ -86,7 +86,7 @@ export default function Register() {
                         });
 
                         // Allows us to redirect the user to the login page after registering for an account
-                        navigate("/recipes");
+                        navigate("/login");
 
                     } else {
 
