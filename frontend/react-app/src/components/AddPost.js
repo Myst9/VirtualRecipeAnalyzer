@@ -51,6 +51,10 @@ useEffect(() => {
       });
   }, []);
 
+  const handleBackClick = () => {
+    navigate(-1); 
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
@@ -99,7 +103,7 @@ useEffect(() => {
   const addPost = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('userId', userId);
+    formData.append('userId', user.name);
     formData.append('title', title);
     formData.append('description', description);
     if (imageFile) {
@@ -218,9 +222,15 @@ useEffect(() => {
                     ))}
                   </div>
                 </Form.Group>
-                <Button variant="primary" type="submit">
-                  Add Post
-                </Button>
+                <div className="d-flex justify-content-between">
+								  <Button variant="primary" onClick={handleBackClick}>
+								    Back
+								  </Button>
+								  <Button variant="primary" type="submit">
+								    Post
+								  </Button>
+								</div>
+
               </Form>
             </Card.Body>
           </Card>
