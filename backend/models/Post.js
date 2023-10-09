@@ -28,8 +28,11 @@ const postSchema = new mongoose.Schema({
 	createdOn: {
 		type: Date,
 		default: new Date()
+	},
+	image: {
+		data: Buffer, 
+		contentType: String 
 	}
-	
 })
 
 module.exports = mongoose.model("Post", postSchema);
