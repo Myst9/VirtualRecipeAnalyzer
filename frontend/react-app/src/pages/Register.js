@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import { Container, Card, Row, Col } from 'react-bootstrap';
 import { useNavigate,Navigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import UserContext from '../UserContext';
@@ -12,12 +13,14 @@ export default function Register() {
     const navigate = useNavigate();
 
     // State hooks to store the values of the input fields
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password1, setPassword1] = useState('');
     const [password2, setPassword2] = useState('');
     const [isActive, setIsActive] = useState('');
 
     // Check if values are successfully binded
+    console.log(name);
     console.log(email);
     console.log(password1);
     console.log(password2);
@@ -58,6 +61,7 @@ export default function Register() {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
+                        name: name,
                         email: email,
                         password: password1
                     })
@@ -70,6 +74,7 @@ export default function Register() {
                     if(data === true){
 
                         // Clear input fields
+                        setName('');
                         setEmail('');
                         setPassword1('');
                         setPassword2('');
@@ -103,21 +108,37 @@ export default function Register() {
     useEffect(() => {
 
         // Validation to enable submit button when all fields are populated and both passwords match
-        if((email !== '' && password1 !== '' && password2 !== '') && (password1 === password2)){
+        if((name!=='' && email !== '' && password1 !== '' && password2 !== '') && (password1 === password2)){
             setIsActive(true);
         } else {
             setIsActive(false);
         }
 
-    }, [email, password1, password2]);
+    }, [name, email, password1, password2]);
 
     return (
-        (user.id !== null) ?
-            <Navigate to="/products" />
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+    <Container >
+            <Row >
+                <Col lg={{span: 6, offset:3}} >
+                    <Card>
+                          <Card.Body className="text-center">
+        {(user.id !== null) ?
+            (<Navigate to="/products" />)
         :
-            <Form onSubmit={(e) => registerUser(e)}>
-            <h1>Register</h1>
+            (<Form onSubmit={(e) => registerUser(e)}>
+            <h2>Register</h2>
 
+                <Form.Group controlId="userName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control 
+                        type="name" 
+                        placeholder="Enter name"
+                        value={name} 
+                        onChange={e => setName(e.target.value)}
+                        required
+                    />
+                </Form.Group>
                 <Form.Group controlId="userEmail">
                     <Form.Label>Email address</Form.Label>
                     <Form.Control 
@@ -127,9 +148,6 @@ export default function Register() {
                         onChange={e => setEmail(e.target.value)}
                         required
                     />
-                    <Form.Text className="text-muted">
-                        We'll never share your email with anyone.
-                    </Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="password1">
@@ -159,11 +177,18 @@ export default function Register() {
                         Submit
                     </Button>
                     : 
-                    <Button variant="danger" type="submit" id="submitBtn" disabled>
+                    <Button variant="danger my-3" type="submit" id="submitBtn">
                         Submit
                     </Button>
                 }
             </Form>
+            )}
+            </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
+        </div>
     )
     
 }
