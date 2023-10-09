@@ -47,7 +47,6 @@ module.exports.analyzeRecipe = async (data) => {
 
         return nutrientTotals;
     } catch (error) {
-        // Handle any errors here
         console.error(error);
         throw error;
     }
@@ -64,6 +63,21 @@ module.exports.getImages = async () => {
                     name: name,
                     imageUrl: imageUrl,
                 });
+            }
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+module.exports.getIngredients = async () => {
+    return new Promise((resolve, reject) => {
+        try {
+            let result = [];
+            for (const food of surveyFoods) {
+                const name = food.description;
+                result.push(name);
             }
             resolve(result);
         } catch (error) {

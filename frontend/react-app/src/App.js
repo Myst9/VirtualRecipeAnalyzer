@@ -8,6 +8,7 @@ import Recipes from './pages/Recipes';
 import Posts from './pages/UserPosts';
 import Post from './pages/Post';
 import AddPost from './components/AddPost';
+import PostDetails from './components/PostDetails'
 
 import './App.css';
 
@@ -49,7 +50,6 @@ export default function App() {
   }, [])
 
   return (
-    // A common pattern in React for the component to return multiple elements
     <>
     <UserProvider value={{ user, setUser, unsetUser }} >
       <Router>
@@ -64,6 +64,7 @@ export default function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/addPost" element={<AddPost />} />
+            <Route path="/posts/:postId" element={<PostDetails />} />
             
             <Route path="/*" element={<Error />} />
           </Routes>
