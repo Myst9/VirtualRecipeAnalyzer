@@ -19,11 +19,11 @@ export default function AppNavbar() {
           <Nav className="mr-auto">
             <Nav.Link as={NavLink} to="/">Home</Nav.Link>
             <Nav.Link as={NavLink} to="/recipes">Recipes</Nav.Link>
-           
+            
             {
               user.id ?
               <>
-              {user.isAdmin && <Nav.Link as={NavLink} to="/admin">Admin</Nav.Link>}
+              <Nav.Link as={NavLink} to="/post">Post</Nav.Link>
               <Nav.Link as={NavLink} to="/logout">Logout</Nav.Link>
               </>
               :

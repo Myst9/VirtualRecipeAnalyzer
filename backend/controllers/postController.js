@@ -1,14 +1,16 @@
 const Post = require("../models/Post");
 
 module.exports.addPost = (data) => {
-
+		console.log("Hello");
 	
 		let newPost = new Post({
-			userId: data.post.name,
+			userId: data.post.userId,
 			title: data.post.title,
 			description: data.post.description
 			
 		});
+
+		console.log(newPost);
 
 		return newPost.save().then((post, error) => {
 
