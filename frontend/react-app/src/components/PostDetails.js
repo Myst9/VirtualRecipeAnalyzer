@@ -12,10 +12,7 @@ export default function PostDetails() {
   useEffect(() => {
     // Fetch the post details using an API request
     fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
+      method: 'GET'
     })
       .then((response) => {
         if (!response.ok) {
@@ -50,11 +47,15 @@ export default function PostDetails() {
 
                   <Card.Subtitle>Ingredients:</Card.Subtitle>
                   <ul>
-                    {post.ingredients.map((ingredient, index) => (
-                      <li key={index}>
-                        {ingredient.name}: {ingredient.quantity} grams
-                      </li>
-                    ))}
+                    {post.ingredients ? (
+                      post.ingredients.map((ingredient, index) => (
+                        <li key={index}>
+                          {ingredient.name}: {ingredient.quantity} grams
+                        </li>
+                      ))
+                    ) : (
+                      <li>No ingredients available</li>
+                    )}
                   </ul>
 
                   <Card.Subtitle>Description:</Card.Subtitle>

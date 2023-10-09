@@ -69,7 +69,7 @@ router.put("/:postId/delete", auth.verify, (req, res) => {
 		resultFromController));
 });
 
-router.get("/:postId", auth.verify, async (req, res) => {
+router.get("/:postId", async (req, res) => {
   const postId = req.params.postId;
 
 console.log(mongoose.Types.ObjectId.isValid(postId));
