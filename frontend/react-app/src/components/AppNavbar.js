@@ -20,11 +20,11 @@ export default function AppNavbar() {
           <Nav className="mr-auto">
             <Nav.Link as={NavLink} to="/" style={{ color: '#fff' }}>Home</Nav.Link>
             <Nav.Link as={NavLink} to="/recipes" style={{ color: '#fff' }}>Recipes</Nav.Link>
+            <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }}>Posts</Nav.Link>
             
             {
               user.id ?
               <>
-              <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }}>Post</Nav.Link>
               <Nav.Link as={NavLink} to="/logout" style={{ color: '#fff' }}>Logout</Nav.Link>
               </>
               :
