@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from 'react-bootstrap';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Card, Container, Row, Col } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
-export default function PostDetails() {
-  const [post, setPost] = useState(null);
+export default function TopPosts() {
+  const [topPosts, setTopPosts] = useState([]);
   const { postId } = useParams();
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
   useEffect(() => {
-    // Fetch the post details using an API request
-    fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
+    // Fetch the top 3 posts using an API request
+    fetch(`${process.env.REACT_APP_API_URL}/posts`, {
       method: 'GET'
     })
       .then((response) => {
@@ -20,8 +19,8 @@ export default function PostDetails() {
         }
         return response.json();
       })
-      .then((data) => setPost(data))
-      .catch((error) => console.error('Error fetching post:', error));
+      .then((data) => setTopPosts(data))
+      .catch((error) => console.error('Error fetching top posts:', error));
   }, [postId]);
 
   return (
@@ -29,7 +28,7 @@ export default function PostDetails() {
       <Container>
         <Row>
           <Col lg={{ span: 6, offset: 3 }}>
-            {post ? (
+            {topPosts ? (
               <Card className="cardHighlight p-0">
                 <Card.Body>
                   {imageUrl && (
@@ -41,14 +40,14 @@ export default function PostDetails() {
                       />
                     </div>
                   )}
-                  <h4 className="text-center mb-4">{post.title}</h4>
+                  <h4 className="text-center mb-4">{topPosts.title}</h4>
                   <Card.Subtitle>Posted by:</Card.Subtitle>
-                  <Card.Text>{post.userId}</Card.Text>
+                  <Card.Text>{topPosts.userId}</Card.Text>
 
                   <Card.Subtitle>Ingredients:</Card.Subtitle>
                   <ul>
-                    {post.ingredients ? (
-                      post.ingredients.map((ingredient, index) => (
+                    {topPosts.ingredients ? (
+                      topPosts.ingredients.map((ingredient, index) => (
                         <li key={index}>
                           {ingredient.name}: {ingredient.quantity} grams
                         </li>
@@ -59,11 +58,11 @@ export default function PostDetails() {
                   </ul>
 
                   <Card.Subtitle>Description:</Card.Subtitle>
-                  <Card.Text>{post.description}</Card.Text>
+                  <Card.Text>{topPosts.description}</Card.Text>
                 </Card.Body>
               </Card>
             ) : (
-              <p>Loading post details...</p>
+              <p>Loading topPosts details...</p>
             )}
           </Col>
         </Row>
@@ -71,3 +70,5 @@ export default function PostDetails() {
     </div>
   );
 }
+
+
