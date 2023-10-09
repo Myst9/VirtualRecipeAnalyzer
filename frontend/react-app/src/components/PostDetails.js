@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Card } from 'react-bootstrap';
+import { Card, Button } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
 
 export default function PostDetails() {
   const [post, setPost] = useState(null);
   const { postId } = useParams();
+  const navigate = useNavigate();
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
   useEffect(() => {
-    // Fetch the post details using an API request
     fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
-      method: 'GET'
+      method: 'GET',
     })
       .then((response) => {
         if (!response.ok) {
@@ -24,6 +24,10 @@ export default function PostDetails() {
       .catch((error) => console.error('Error fetching post:', error));
   }, [postId]);
 
+  const handleBackClick = () => {
+    navigate(-1);
+  };
+
   return (
     <div>
       <Container>
@@ -33,11 +37,12 @@ export default function PostDetails() {
               <Card className="cardHighlight p-0">
                 <Card.Body>
                   {imageUrl && (
-                    <div>
+                    <div className="text-center">
                       <img
                         src={imageUrl}
                         alt="Post Image"
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        className="centered-image"
                       />
                     </div>
                   )}
@@ -60,6 +65,10 @@ export default function PostDetails() {
 
                   <Card.Subtitle>Description:</Card.Subtitle>
                   <Card.Text>{post.description}</Card.Text>
+
+                  <Button variant="primary" onClick={handleBackClick}>
+                    Back
+                  </Button>
                 </Card.Body>
               </Card>
             ) : (

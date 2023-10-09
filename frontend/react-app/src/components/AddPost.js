@@ -16,6 +16,25 @@ export default function AddPost() {
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [selectedIngredientToAddQuantity, setSelectedIngredientToAddQuantity] = useState(null);
   const [quantityInput, setQuantityInput] = useState('');
+  const [user, setUser] = useState(null);
+
+useEffect(() => {
+  // Make a request to your backend to get the user's information
+  fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((userData) => {
+      setUser(userData); 
+      console.log(userData);
+    })
+    .catch((error) => {
+      console.error('Error fetching user data:', error);
+    });
+}, []);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/recipes/ingredient-names`)
@@ -31,6 +50,10 @@ export default function AddPost() {
         console.error('Error fetching ingredient names:', error);
       });
   }, []);
+
+  const handleBackClick = () => {
+    navigate(-1); 
+  };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -80,7 +103,7 @@ export default function AddPost() {
   const addPost = (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('userId', userId);
+    formData.append('userId', user.name);
     formData.append('title', title);
     formData.append('description', description);
     if (imageFile) {
@@ -137,13 +160,12 @@ export default function AddPost() {
               <Form onSubmit={(e) => addPost(e)}>
                 <Form.Group className="mb-3" controlId="form.Name">
                   <Form.Label className="text-center">User</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="userId"
-                    onChange={(e) => setUserId(e.target.value)}
-                    value={userId}
-                    required
-                  />
+  <Form.Control
+    type="text"
+    placeholder={user ? user.name : ''}
+    value={user ? user.name : ''}
+    readOnly
+  />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label className="text-center" controlId="form.Title">
@@ -200,9 +222,15 @@ export default function AddPost() {
                     ))}
                   </div>
                 </Form.Group>
-                <Button variant="primary" type="submit">
-                  Add Post
-                </Button>
+                <div className="d-flex justify-content-between">
+								  <Button variant="primary" onClick={handleBackClick}>
+								    Back
+								  </Button>
+								  <Button variant="primary" type="submit">
+								    Post
+								  </Button>
+								</div>
+
               </Form>
             </Card.Body>
           </Card>

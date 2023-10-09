@@ -7,14 +7,14 @@ export default function PostCard({ post }) {
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${_id}`;
 
-  const postUrl = `/posts/${_id}`; 
+  const postUrl = `/posts/${_id}`;
 
   return (
     <Container>
       <Row>
         <Col lg={12}>
           <Link to={postUrl} style={{ textDecoration: 'none' }}>
-            <Card className="cardHighlight p-0">
+            <div className="rounded overflow-hidden shadow">
               {imageUrl && (
                 <div style={{ position: 'relative', paddingTop: '75%' }}>
                   <img
@@ -30,15 +30,17 @@ export default function PostCard({ post }) {
                   />
                 </div>
               )}
-              <Card.Body style={{ height: '100px' }}>
-                {/* Set a fixed height for the card body */}
-                <Card.Title>
-                  <h4 className="text-center">{title}</h4>
-                </Card.Title>
-                <Card.Subtitle>Posted by:</Card.Subtitle>
-                <Card.Text>{userId}</Card.Text>
-              </Card.Body>
-            </Card>
+              <Card className="cardHighlight p-0 border-0">
+                <Card.Body style={{ height: '100px' }}>
+                  {/* Set a fixed height for the card body */}
+                  <Card.Title>
+                    <h4 className="text-center">{title}</h4>
+                  </Card.Title>
+                  <Card.Subtitle>Posted by:</Card.Subtitle>
+                  <Card.Text>{userId}</Card.Text>
+                </Card.Body>
+              </Card>
+            </div>
           </Link>
         </Col>
       </Row>
