@@ -6,12 +6,11 @@ import { Container, Row, Col } from 'react-bootstrap';
 export default function PostDetails() {
   const [post, setPost] = useState(null);
   const { postId } = useParams();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
   useEffect(() => {
-    
     fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
       method: 'GET',
     })
@@ -26,7 +25,7 @@ export default function PostDetails() {
   }, [postId]);
 
   const handleBackClick = () => {
-    navigate(-1); 
+    navigate(-1);
   };
 
   return (
@@ -38,11 +37,12 @@ export default function PostDetails() {
               <Card className="cardHighlight p-0">
                 <Card.Body>
                   {imageUrl && (
-                    <div>
+                    <div className="text-center">
                       <img
                         src={imageUrl}
                         alt="Post Image"
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        className="centered-image"
                       />
                     </div>
                   )}
