@@ -30,14 +30,12 @@ body {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  font-size: 24px; /* Adjust the size as needed */
-  color: #007bff; /* Adjust the color as needed */
+  font-size: 24px; 
+  color: #007bff; 
   cursor: pointer;
 }
 
 .arrow-icon {
-  /* Adjust the margin as needed */
-  transform: translateY(1px); /* Adjust the vertical position as needed */
-  /* You can add other styles to customize the arrow icon */
+  transform: translateY(1px);
 }
 
