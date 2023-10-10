@@ -475,7 +475,7 @@ const tdStyle = {
         contentLabel="Enter Quantity"
         style={modalStyles}
       >
-        <h2>Enter Quantity (in grams) for {ingredientToSelect?.name}:</h2>
+        <h2 style={{ fontSize: '15px' }}>Enter Quantity (in grams) for {ingredientToSelect?.name}:</h2>
         <input
           type="number"
           value={ingredientToSelect?.quantity || ''}
@@ -484,7 +484,7 @@ const tdStyle = {
             setIngredientToSelect({ ...ingredientToSelect, quantity });
           }}
         />
-        <div>
+        <div className="mt-3">
           <button
             onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
             style={{
@@ -504,8 +504,8 @@ const tdStyle = {
           <button
             onClick={() => setIngredientToSelect(null)}
             style={{
-              backgroundColor: '#ccc',
-              color: '#007bff',
+              backgroundColor: '#FF6865',
+              color: 'white',
               borderRadius: '4px',
               padding: '10px 20px',
               border: 'none',
