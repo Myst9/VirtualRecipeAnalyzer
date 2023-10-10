@@ -101,7 +101,7 @@ export default function Login(props){
 					<Card>
 					      <Card.Body className="text-center">
 		{(user.id !== null) ? (
-			<Navigate to="/recipes" />
+			<Navigate to="/" />
 		) : (
 			<Form onSubmit={(e) => authenticate(e)}>
 			<h2>Login</h2>

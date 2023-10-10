@@ -124,7 +124,9 @@ export default function Register() {
                     <Card>
                           <Card.Body className="text-center">
         {(user.id !== null) ?
+
             (<Navigate to="/login" />)
+
         :
             (<Form onSubmit={(e) => registerUser(e)}>
             <h2>Register</h2>
