@@ -82,7 +82,7 @@ export default function Register() {
                         Swal.fire({
                             title: 'Registration successful',
                             icon: 'success',
-                            text: 'Welcome to Virtual Recipe Store!'
+                            text: 'Welcome to Virtual Recipe Analyzer!'
                         });
 
                         // Allows us to redirect the user to the login page after registering for an account
@@ -124,7 +124,7 @@ export default function Register() {
                     <Card>
                           <Card.Body className="text-center">
         {(user.id !== null) ?
-            (<Navigate to="/products" />)
+            (<Navigate to="/login" />)
         :
             (<Form onSubmit={(e) => registerUser(e)}>
             <h2>Register</h2>
