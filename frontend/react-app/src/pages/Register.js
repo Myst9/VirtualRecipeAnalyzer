@@ -126,7 +126,6 @@ export default function Register() {
         {(user.id !== null) ?
 
             (<Navigate to="/login" />)
-
         :
             (<Form onSubmit={(e) => registerUser(e)}>
             <h2>Register</h2>
