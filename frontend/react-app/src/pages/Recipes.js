@@ -262,17 +262,18 @@ export default function Recipes() {
   };
 
   const thStyle = {
-    backgroundColor: '#f2f2f2',
-    padding: '8px',
-    fontWeight: 'bold',
-    borderBottom: '1px solid #ddd',
-  };
+  backgroundColor: '#343a40', // Background color for table headers
+  color: 'white', // Text color for table headers
+  padding: '8px',
+  fontWeight: 'bold',
+  borderBottom: '1px solid #ddd',
+};
 
-  const tdStyle = {
-    border: '1px solid #ddd',
-    padding: '8px',
-    borderBottom: '1px solid #ddd',
-  };
+const tdStyle = {
+  border: '1px solid #ddd',
+  padding: '8px',
+  borderBottom: '1px solid #ddd',
+};
 
   return (
     <div className="recipe-container">
@@ -439,28 +440,28 @@ export default function Recipes() {
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {Object.keys(categorizedNutrients).map((category) => (
                   <div key={category} style={{ flex: '1', minWidth: '400px', margin: '10px' }}>
-                    <h3>{category}</h3>
-                    <div style={{ width: '100%' }}>
-                      <table style={tableStyle}>
-                        <thead>
-                          <tr>
-                            <th style={thStyle}>Nutrient Name</th>
-                            <th style={thStyle}>Amount</th>
-                            <th style={thStyle}>Unit</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {categorizedNutrients[category].map((detail, index) => (
-                            <tr key={index}>
-                              <td style={tdStyle}>{detail.nutrientName}</td>
-                              <td style={tdStyle}>{detail.nutrientAmount}</td>
-                              <td style={tdStyle}>{detail.nutrientUnit}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+  <h3>{category}</h3>
+  <div style={{ width: '100%' }}>
+    <table className="table table-bordered" style={tableStyle}>
+    <thead className="thead-light">
+      <tr>
+        <th style={thStyle}>Nutrient Name</th>
+        <th style={thStyle}>Amount</th>
+        <th style={thStyle}>Unit</th>
+      </tr>
+    </thead>
+    <tbody>
+      {categorizedNutrients[category].map((detail, index) => (
+        <tr key={index}>
+          <td style={tdStyle}>{detail.nutrientName}</td>
+          <td style={tdStyle}>{detail.nutrientAmount}</td>
+          <td style={tdStyle}>{detail.nutrientUnit}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  </div>
+</div>
                 ))}
               </div>
             </div>
