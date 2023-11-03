@@ -89,4 +89,55 @@ console.log(postId);
     res.status(500).send("Internal server error");
   });
 });
+
+// Route to like a post
+router.post("/like/:postId", async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    const updatedPost = await postController.likePost(postId);
+    const likeCounts = await postController.getLikeCounts(postId);
+
+    res.json({
+      post: updatedPost,
+      likeCounts,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to dislike a post
+router.post("/dislike/:postId", async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    const updatedPost = await postController.dislikePost(postId);
+    //const likeCounts = await postController.getLikeCounts(postId);
+
+    res.json({
+      post: updatedPost,
+      //likeCounts,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to get like counts for a post
+/*router.get("/likeCounts/:postId", async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    const likeCounts = await postController.getLikeCounts(postId);
+
+    res.json({ likes: likeCounts });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});*/
+
 module.exports = router;

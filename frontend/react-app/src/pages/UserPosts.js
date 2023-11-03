@@ -1,32 +1,45 @@
-import { Table } from 'react-bootstrap';
+import React, { useContext, useState, useEffect } from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
 import PostCard from '../components/PostCard';
-import { useState, useEffect } from 'react';
-import { Container, Row, Col, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 
-export default function UserPosts() {
+export default function UserPosts({ searchQuery }) {
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/posts/all-posts`)
-      .then(res => res.json())
-      .then(data => {
-        console.log(data);
-
+      .then((res) => res.json())
+      .then((data) => {
         setPosts(data);
       });
   }, []);
 
-  const groupedPosts = [];
-  for (let i = 0; i < posts.length; i += 3) {
-    groupedPosts.push(posts.slice(i, i + 3));
+  // Update filteredPosts whenever the searchQuery changes
+  useEffect(() => {
+    if (searchQuery) {
+      // Filter posts based on the searchQuery
+      const lowercaseSearchQuery = searchQuery.toLowerCase();
+      const filtered = posts.filter((post) => {
+        return post.title.toLowerCase().includes(lowercaseSearchQuery);
+      });
+
+      setFilteredPosts(filtered);
+    } else {
+      // If there's no search query, show all posts
+      setFilteredPosts(posts);
+    }
+  }, [searchQuery, posts]);
+
+  const groupedFilteredPosts = [];
+  for (let i = 0; i < filteredPosts.length; i += 3) {
+    groupedFilteredPosts.push(filteredPosts.slice(i, i + 3));
   }
 
   return (
     <Container>
-      {groupedPosts.map((row, rowIndex) => (
+      {groupedFilteredPosts.map((row, rowIndex) => (
         <Row key={rowIndex} className="mb-3">
-          {row.map(post => (
+          {row.map((post) => (
             <Col key={post._id} lg={4}>
               <PostCard post={post} />
             </Col>
