@@ -18,9 +18,22 @@ module.exports.analyzeRecipe = async (data) => {
             const surveyFood = nutrientData.SurveyFoods.find((food) => food.description === ingredient.name);
 
             if (surveyFood) {
+                // Determine the appropriate unit and weight from portionDescription
+                let unit = 'g'; // Default to grams
+                let weight = 100; // Default to 100 grams
+
+                if (ingredient.unit && ingredient.unit !== 'g') {
+                    const portion = surveyFood.foodPortions.find((portion) => portion.portionDescription.toLowerCase() === ingredient.unit.toLowerCase());
+
+                    if (portion) {
+                        unit = 'g';
+                        weight = portion.gramWeight;
+                    }
+                }
+
                 for (const nutrient of surveyFood.foodNutrients) {
                     const nutrientName = nutrient.nutrient.name;
-                    const nutrientAmount = (nutrient.amount / 100) * ingredient.quantity;
+                    const nutrientAmount = ((nutrient.amount / 100) * weight * ingredient.quantity).toFixed(2);
                     const nutrientUnit = nutrient.nutrient.unitName; // Get the unit name
 
                     // Add or update the total nutrients and their units
