@@ -73,3 +73,50 @@ module.exports.deletePost = (data, reqParams) => {
 
   };
 
+  // Function to like a post
+module.exports.likePost = async (postId) => {
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    post.likes += 1;
+    return post.save();
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Function to dislike a post
+module.exports.dislikePost = async (postId) => {
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    post.dislikes += 1;
+    return post.save();
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Function to get like counts for a post
+module.exports.getLikeCounts = async (postId) => {
+  try {
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      throw new Error("Post not found");
+    }
+
+    return  post.likes;
+
+  } catch (error) {
+    throw error;
+  }
+};
