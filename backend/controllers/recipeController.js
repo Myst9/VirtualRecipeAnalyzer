@@ -24,10 +24,14 @@ module.exports.analyzeRecipe = async (data) => {
 
                 if (ingredient.unit && ingredient.unit !== 'g') {
                     const portion = surveyFood.foodPortions.find((portion) => portion.portionDescription.toLowerCase() === ingredient.unit.toLowerCase());
-
+                    const portion2 = surveyFood.foodPortions.find((portion) => portion.portionDescription.toLowerCase() === "1 " + ingredient.unit.toLowerCase());
                     if (portion) {
                         unit = 'g';
                         weight = portion.gramWeight;
+                    }
+                    else if (portion2) {
+                        unit = 'g';
+                        weight = portion2.gramWeight;
                     }
                 }
 
@@ -83,6 +87,24 @@ module.exports.getImages = async () => {
         }
     });
 };
+
+module.exports.getUnits = async (data) => {
+    return new Promise((resolve, reject) => {
+        try {
+            let units = ["g"];
+            const food = nutrientData.SurveyFoods.find((food) => food.description === data.name);
+            for (const portion of food.foodPortions) {
+                    let measure = portion.portionDescription.replace(/^1 /, '');
+                    if(measure!="Quantity not specified"){
+                        units.push(measure);
+                    }
+                }
+            resolve(units);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
 
 module.exports.getIngredients = async () => {
     return new Promise((resolve, reject) => {

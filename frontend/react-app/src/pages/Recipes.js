@@ -112,6 +112,7 @@ export default function Recipes() {
   const [nutritionalDetails, setNutritionalDetails] = useState(null);
   const [bowlImages, setBowlImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
+  const [ingredientUnits, setIngredientUnits] = useState([]);
 
   useEffect(() => {
     const storedIngredients = JSON.parse(localStorage.getItem('selectedIngredients'));
@@ -149,28 +150,43 @@ export default function Recipes() {
 
   const handleIngredientSelect = (ingredient) => {
     setIngredientToSelect(ingredient);
+    fetch('http://localhost:4000/recipes/get-units', {
+    method: 'POST',
+    body: JSON.stringify({ name: ingredient.name }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      setIngredientUnits(data);
+    })
+    .catch((error) => {
+      console.error('Error fetching units:', error);
+    });
   };
 
   const handleAddIngredient = (quantity) => {
-    if (quantity !== null && quantity !== '') {
-      // Check if the ingredient is already in selectedIngredients
-      const existingIngredientIndex = selectedIngredients.findIndex(
-        (ingredient) => ingredient.name === ingredientToSelect.name
-      );
+  if (quantity !== null && quantity !== '') {
+    // Check if the ingredient is already in selectedIngredients
+    const existingIngredientIndex = selectedIngredients.findIndex(
+      (ingredient) => ingredient.name === ingredientToSelect.name
+    );
 
-      if (existingIngredientIndex !== -1) {
-        const updatedIngredients = [...selectedIngredients];
-        updatedIngredients[existingIngredientIndex].quantity = quantity;
+    if (existingIngredientIndex !== -1) {
+      const updatedIngredients = [...selectedIngredients];
+      updatedIngredients[existingIngredientIndex].quantity = quantity;
+      updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
 
-        setSelectedIngredients(updatedIngredients);
-      } else {
-        const newIngredient = { ...ingredientToSelect, quantity };
-        setSelectedIngredients([...selectedIngredients, newIngredient]);
-      }
-
-      setIngredientToSelect(null);
+      setSelectedIngredients(updatedIngredients);
+    } else {
+      const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
+      setSelectedIngredients([...selectedIngredients, newIngredient]);
     }
-  };
+
+    setIngredientToSelect(null);
+  }
+};
 
   const clearNutritionalDetails = () => {
     setNutritionalDetails(null);
@@ -192,9 +208,10 @@ export default function Recipes() {
   const handleAnalyzeRecipe = () => {
     setIsAnalyzing(true);
 
-    const formattedIngredients = selectedIngredients.map(({ name, quantity }) => ({
+    const formattedIngredients = selectedIngredients.map(({ name, quantity, unit }) => ({
       name,
       quantity,
+      unit,
     }));
 
     fetch('http://localhost:4000/recipes/analyze-recipe', {
@@ -367,7 +384,7 @@ const tdStyle = {
                     </button>
                   </div>
                   <h6>
-                    {ingredient.name} - {ingredient.quantity} g
+                    {ingredient.name} - {ingredient.quantity} {ingredient.unit}
                   </h6>
                 </div>
               ))}
@@ -470,56 +487,68 @@ const tdStyle = {
       </div>
 
       <Modal
-        isOpen={!!ingredientToSelect}
-        onRequestClose={() => setIngredientToSelect(null)}
-        contentLabel="Enter Quantity"
-        style={modalStyles}
-      >
-        <h2 style={{ fontSize: '15px' }}>Enter Quantity (in grams) for {ingredientToSelect?.name}:</h2>
-        <input
-          type="number"
-          value={ingredientToSelect?.quantity || ''}
-          onChange={(e) => {
-            const quantity = e.target.value;
-            setIngredientToSelect({ ...ingredientToSelect, quantity });
-          }}
-        />
-        <div className="mt-3">
-          <button
-            onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
-            style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              borderRadius: '4px',
-              padding: '10px 20px',
-              border: 'none',
-              cursor: 'pointer',
-              outline: 'none',
-              fontWeight: 'bold',
-              fontSize: '16px',
-            }}
-          >
-            Add
-          </button>
-          <button
-            onClick={() => setIngredientToSelect(null)}
-            style={{
-              backgroundColor: '#FF6865',
-              color: 'white',
-              borderRadius: '4px',
-              padding: '10px 20px',
-              border: 'none',
-              cursor: 'pointer',
-              outline: 'none',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              marginLeft: '10px',
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      </Modal>
+  isOpen={!!ingredientToSelect}
+  onRequestClose={() => setIngredientToSelect(null)}
+  contentLabel="Enter Quantity"
+  style={modalStyles}
+>
+  <h2 style={{ fontSize: '15px' }}>Enter Quantity for {ingredientToSelect?.name}:</h2>
+  <input
+    type="number"
+    value={ingredientToSelect?.quantity || ''}
+    onChange={(e) => {
+      const quantity = e.target.value;
+      setIngredientToSelect({ ...ingredientToSelect, quantity });
+    }}
+  />
+  <div className="mt-3">
+    <select
+      value={ingredientToSelect?.selectedUnit || ''}
+      onChange={(e) => {
+        const selectedUnit = e.target.value;
+        setIngredientToSelect({ ...ingredientToSelect, selectedUnit });
+      }}
+    >
+      <option value="">Select Unit</option>
+      {ingredientUnits.map((unit, index) => (
+        <option key={index} value={unit}>{unit}</option>
+      ))}
+    </select>
+    <button
+      onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
+      style={{
+        backgroundColor: '#007bff',
+        color: 'white',
+        borderRadius: '4px',
+        padding: '10px 20px',
+        border: 'none',
+        cursor: 'pointer',
+        outline: 'none',
+        fontWeight: 'bold',
+        fontSize: '16px',
+      }}
+    >
+      Add
+    </button>
+    <button
+      onClick={() => setIngredientToSelect(null)}
+      style={{
+        backgroundColor: '#FF6865',
+        color: 'white',
+        borderRadius: '4px',
+        padding: '10px 20px',
+        border: 'none',
+        cursor: 'pointer',
+        outline: 'none',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        marginLeft: '10px',
+      }}
+    >
+      Cancel
+    </button>
+  </div>
+</Modal>
     </div>
   );
 }

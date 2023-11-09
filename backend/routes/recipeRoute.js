@@ -20,4 +20,8 @@ router.get("/ingredient-names", (req, res) => {
 	recipeController.getIngredients().then(resultFromController => res.send(resultFromController));
 });
 
+router.post("/get-units", (req, res) => {
+	recipeController.getUnits(req.body).then(resultFromController => res.send(resultFromController));
+})
+
 module.exports = router;
