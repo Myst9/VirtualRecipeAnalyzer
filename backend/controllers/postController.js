@@ -39,39 +39,43 @@ module.exports.getPost = async (postId) => {
 };
 
 
-module.exports.updatePost = (data, reqParams, reqBody) => {
-	
-		let updatedPost = {
-	
-			description: reqBody.description,
-			
-		};
+module.exports.updatePost = (reqParams, reqBody) => {
+  let updatedPost = {
+    title: reqBody.title,
+    ingredients: reqBody.ingredients,
+    description: reqBody.description,
+  };
 
-		return Post.findByIdAndUpdate(reqParams.postId, updatedPost).then((post, error) => {
-			if(error){
-				return false;
-			} else {
-				return true;
-			};
-		});
+  return Post.findByIdAndUpdate(reqParams.postId, updatedPost, { new: true }) // Use { new: true } to get the updated document
+    .then((post) => {
+      if (!post) {
+        return false;
+      } else {
+        console.log(post);
+        return post; // Return the updated post
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      throw new Error('Error updating post');
+    });
 };
 
-module.exports.deletePost = (data, reqParams) => {
-  
-    return Post.findByIdAndDelete(reqParams.postId)
-      .then((post) => {
-        if (!post) {
-          return false;
-        }
-        return true;
-      })
-      .catch((error) => {
-        console.error(error);
-        return false; 
-      });
-  
 
-  };
+module.exports.deletePost = (reqParams) => {
+  return Post.findByIdAndDelete(reqParams.postId)
+    .then((post) => {
+      if (!post) {
+        return false;
+      }
+      return true;
+    })
+    .catch((error) => {
+      console.error('Error deleting post:', error);
+      return false; 
+    });
+};
+
 
   // Function to like a post
 module.exports.likePost = async (postId) => {
