@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Recipe = require("../models/Recipe");
+const Post = require("../models/Post");
 
 const filePath = path.join(__dirname, '../data/FoodData_Central_survey_food_json_2022-10-28.json');
 const nutrientData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -42,10 +43,10 @@ module.exports.analyzeRecipe = async (data) => {
 
                     // Add or update the total nutrients and their units
                     if (totalNutrients[nutrientName]) {
-                        totalNutrients[nutrientName].amount += nutrientAmount;
+                        totalNutrients[nutrientName].amount += parseFloat(nutrientAmount);
                     } else {
                         totalNutrients[nutrientName] = {
-                            amount: nutrientAmount,
+                            amount: parseFloat(nutrientAmount),
                             unit: nutrientUnit, // Store the unit name
                         };
                     }
@@ -57,7 +58,7 @@ module.exports.analyzeRecipe = async (data) => {
         for (const nutrientName in totalNutrients) {
             nutrientTotals.push({
                 nutrientName,
-                nutrientAmount: totalNutrients[nutrientName].amount,
+                nutrientAmount: totalNutrients[nutrientName].amount.toFixed(2),
                 nutrientUnit: totalNutrients[nutrientName].unit, 
             });
         }
@@ -120,3 +121,43 @@ module.exports.getIngredients = async () => {
         }
     });
 };
+
+module.exports.getSimilarRecipes = async (data) => {
+  try {
+    const userIngredients = data.ingredients;
+    const matchedRecipes = [];
+
+    // Calculate the Jaccard similarity for each recipe and filter recipes with a match above 60%
+    const recipes = await Post.find();
+
+    recipes.forEach((recipe) => {
+        //console.log(recipe);
+        const ingredientNames = new Set();
+      recipe.ingredients.forEach((ingredient) => {
+        ingredientNames.add(ingredient.name);
+      });
+      //console.log(ingredientNames);
+      const intersection = userIngredients.filter((ingredient) => ingredientNames.has(ingredient));
+      const union = new Set([...userIngredients, ...ingredientNames]);
+      const similarity = intersection.length / union.size;
+
+      if (similarity >= 0.4) {
+        const recipeId = recipe._id
+        //console.log(recipeId);
+        matchedRecipes.push({
+          recipeId : recipeId,
+          similarity : similarity,
+        });
+      }
+    });
+
+    // Sort the matched recipes by similarity in descending order
+    matchedRecipes.sort((a, b) => b.similarity - a.similarity);
+
+    return matchedRecipes.map((matchedRecipe) => matchedRecipe.recipeId);
+  } catch (error) {
+    console.error(error);
+    throw new Error('Internal server error');
+  }
+};
+
