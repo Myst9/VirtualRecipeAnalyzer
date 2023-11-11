@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
+import { useNavigate } from 'react-router-dom';
 
 Modal.setAppElement('#root');
 
@@ -113,6 +114,8 @@ export default function Recipes() {
   const [bowlImages, setBowlImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [ingredientUnits, setIngredientUnits] = useState([]);
+  const [similarRecipes, setSimilarRecipes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedIngredients = JSON.parse(localStorage.getItem('selectedIngredients'));
@@ -236,6 +239,29 @@ export default function Recipes() {
   const filteredIngredients = ingredients.filter((ingredient) =>
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleFindRecipe = () => {
+
+    const formattedIngredients = selectedIngredients.map(ingredient => ingredient.name);
+
+    fetch('http://localhost:4000/recipes/find-recipes', {
+      method: 'POST',
+      body: JSON.stringify({ ingredients: formattedIngredients }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const postIdsString = data.join(',');
+
+    // Redirect to the new page with postIds as query parameters
+    navigate(`/similar-recipes?postIds=${postIdsString}`);
+        })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   useEffect(() => {
     // Save selected ingredients to localStorage whenever it changes
@@ -391,6 +417,24 @@ const tdStyle = {
             </div>
 
             <div className="analysis-section" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'right' }}>
+              <button
+                onClick={handleFindRecipe}
+                disabled={selectedIngredients.length === 0}
+                style={{
+                  backgroundColor:
+                    selectedIngredients.length === 0 ? '#ccc' : '#007bff',
+                  color: 'white',
+                  borderRadius: '4px',
+                  padding: '10px 20px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  fontWeight: 'bold',
+                  fontSize: '16px',
+                }}
+              >
+                Find Recipes
+              </button>
               <button
                 onClick={handleAnalyzeRecipe}
                 disabled={selectedIngredients.length === 0}
