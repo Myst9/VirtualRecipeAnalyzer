@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import PostCard from '../components/PostCard';
 
 const fetchPostById = async (postId) => {
@@ -22,14 +22,20 @@ const fetchPostById = async (postId) => {
 const SimilarRecipes = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const postIds = queryParams.get('postIds').split(',');
+  const postIds = queryParams.get('postIds');
 
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    if (!postIds) {
+      // No post IDs in the query, handle accordingly
+      return;
+    }
+
     const fetchPosts = async () => {
       try {
-        const fetchedPosts = await Promise.all(postIds.map((postId) => fetchPostById(postId)));
+        const fetchedPosts = await Promise.all(postIds.split(',').map((postId) => fetchPostById(postId)));
         setPosts(fetchedPosts);
       } catch (error) {
         console.error('Error fetching posts:', error);
@@ -39,14 +45,23 @@ const SimilarRecipes = () => {
     fetchPosts();
   }, [postIds]);
 
+  if (!postIds) {
+    return (
+      <Container>
+        <h2>No recipes found with given ingredients</h2>
+        <Button onClick={() => navigate(-1)}>Go Back</Button>
+      </Container>
+    );
+  }
+
   const groupedPosts = [];
   for (let i = 0; i < posts.length; i += 3) {
     groupedPosts.push(posts.slice(i, i + 3));
   }
 
   return (
-    <Container>
-      <h2>Similar Recipes</h2>
+    <Container className="mt-5">
+      <h2 className="text-center mb-5">Similar Recipes</h2>
       {groupedPosts.map((row, rowIndex) => (
         <Row key={rowIndex} className="mb-3">
           {row.map(post => (
