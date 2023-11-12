@@ -30,16 +30,16 @@ export default function Post() {
 
   return (
     <>
-      <Container className="d-flex justify-content-center">
+      <Container className="d-flex justify-content-center mt-5">
         <div>
           
           <Container className="d-flex justify-content-center mt-4">
             {user.id ? (
-              <Button variant="primary" as={Link} to="/addPost">
+              <Button variant="primary" as={Link} to="/addPost" style={{ padding: '10px', backgroundColor: '#eb3464' }}>
                 Post a Recipe
               </Button>
             ) : (
-              <Button variant="primary" as={Link} to="/login">
+              <Button variant="primary" as={Link} to="/login" style={{ padding: '10px', backgroundColor: '#eb3464' }}>
                 Log In To Post
               </Button>
             )}

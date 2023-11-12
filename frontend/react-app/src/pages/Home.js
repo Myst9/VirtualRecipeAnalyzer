@@ -35,7 +35,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="pageContainer">
+    <div className="pageContainer mt-5">
       <Banner data={data} />
       
       <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>

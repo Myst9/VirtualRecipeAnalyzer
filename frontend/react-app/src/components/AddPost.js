@@ -151,11 +151,11 @@ useEffect(() => {
   };
 
   return (
-    <Container>
+    <Container className='mt-5'>
       <Row>
         <Col lg={{ span: 6, offset: 3 }}>
           <Card>
-            <Card.Body className="text-center">
+            <Card.Body className="text-center mt-3">
               <h1>Add Post</h1>
               <Form onSubmit={(e) => addPost(e)}>
                 <Form.Group className="mb-3" controlId="form.Name">

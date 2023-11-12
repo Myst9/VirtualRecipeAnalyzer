@@ -194,7 +194,14 @@ export default function Recipes() {
   );
 
   const handleIngredientSelect = (ingredient) => {
-    setIngredientToSelect(ingredient);
+    // Set a default unit to 'g' if not already selected
+    const defaultUnit = 'g';
+  
+    setIngredientToSelect((prevIngredient) => ({
+      ...ingredient,
+      selectedUnit: prevIngredient?.selectedUnit || defaultUnit,
+    }));
+  
     fetch('http://localhost:4000/recipes/get-units', {
       method: 'POST',
       body: JSON.stringify({ name: ingredient.name }),
@@ -210,6 +217,7 @@ export default function Recipes() {
         console.error('Error fetching units:', error);
       });
   };
+  
 
   const handleAddIngredient = (quantity) => {
     if (quantity !== null && quantity !== '') {
@@ -392,13 +400,14 @@ export default function Recipes() {
   const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalProteinWeight;
 
   return (
-    <div className="recipe-container">
+    <div className="recipe-container mt-5">
 
       <div className="ingredients-container" >
         <div className="up-container" style={{ display: 'flex', flexDirection: 'row', color: 'white', paddingTop: '20px' }}>
           <div className="ingredients-section ">
             {/* <h2 style={{ padding : '10px'}}>Ingredients</h2> */}
-            <div className="ingredient-search">
+            <h2></h2>
+            <div className="ingredient-search" style={{ paddingBottom : '10px'}}>
               <input
                 type="text"
                 placeholder="Search ingredients"
@@ -519,7 +528,7 @@ export default function Recipes() {
           </div>
         </div>
         
-        <div className="total-weight-section">
+        <div className="total-weight-section" style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
           <h2>Total Nutritional Weights</h2>
           <table className="table">
             <thead>
@@ -599,7 +608,7 @@ export default function Recipes() {
             </div>
           ) : showAdditionalDetails ? (
             <div className="additional-details" style={{ color: 'white' }}>
-              <h2>Nutritional Details</h2>
+              {/* <h2>Nutritional Details</h2> */}
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {Object.keys(categorizedNutrients).map((category) => (
                   <div key={category} style={{ flex: '1', minWidth: '400px', margin: '10px' }}>

@@ -47,10 +47,11 @@ const SimilarRecipes = () => {
 
   if (!postIds) {
     return (
-      <Container>
-        <h2>No recipes found with given ingredients</h2>
-        <Button onClick={() => navigate(-1)}>Go Back</Button>
+      <Container style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '70vh' }}>
+        <h2 style={{ color: 'white' }}>No recipes found with given ingredients</h2>
+        <Button onClick={() => navigate(-1)} style={{ padding: '10px', backgroundColor: '#eb3464', color: 'white' }}>Go Back</Button>
       </Container>
+
     );
   }
 
