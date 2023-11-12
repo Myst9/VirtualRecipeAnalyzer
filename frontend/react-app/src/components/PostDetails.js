@@ -3,6 +3,7 @@ import { Card, Button, Modal, Form } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
+import Swal from 'sweetalert2';
 
 export default function PostDetails() {
   const [post, setPost] = useState(null);
@@ -18,28 +19,30 @@ export default function PostDetails() {
   const [selectedIngredientToAddQuantity, setSelectedIngredientToAddQuantity] = useState(null);
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [quantityInput, setQuantityInput] = useState('');
-  
+  const [unitsOptions, setUnitsOptions] = useState([]);
+  const [unit, setUnit] = useState('');
+
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
-useEffect(() => {
-  // Make a request to your backend to get the user's information
-  fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  })
-    .then((response) => response.json())
-    .then((userData) => {
-      setUser(userData); 
-      console.log(userData);
+  useEffect(() => {
+    // Make a request to your backend to get the user's information
+    fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     })
-    .catch((error) => {
-      console.error('Error fetching user data:', error);
-    });
-}, []);
+      .then((response) => response.json())
+      .then((userData) => {
+        setUser(userData);
+        console.log(userData);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
+  }, []);
 
-useEffect(() => {
+  useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/recipes/ingredient-names`)
       .then((response) => response.json())
       .then((data) => {
@@ -57,44 +60,77 @@ useEffect(() => {
   const isCurrentUserPost = post && user && post.userId === user.name;
 
   useEffect(() => {
-  fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
-    method: 'GET',
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+    fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
+      method: 'GET',
     })
-    .then((data) => {
-      setPost(data);
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setPost(data);
 
-      // Initialize selectedIngredients based on existing post's ingredients
-      setSelectedIngredients(data.ingredients ? [...data.ingredients] : []);
-    })
-    .catch((error) => console.error('Error fetching post:', error));
-}, [postId]);
+        // Initialize selectedIngredients based on existing post's ingredients
+        setSelectedIngredients(data.ingredients ? [...data.ingredients] : []);
+      })
+      .catch((error) => console.error('Error fetching post:', error));
+  }, [postId]);
 
+  useEffect(() => {
+    fetchUnits();
+  }, [selectedIngredientToAddQuantity]); // Run this effect when selectedIngredientToAddQuantity changes
 
-  const handleQuantityModalAdd = (quantity) => {
-    setShowQuantityModal(false);
-
+  const fetchUnits = async () => {
     if (selectedIngredientToAddQuantity) {
-      const existingIngredientIndex = selectedIngredients.findIndex(
-        (ingredient) => ingredient.name === selectedIngredientToAddQuantity.label
-      );
+      try {
+        // Fetch units for the selected ingredient
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/recipes/get-units`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({ name: selectedIngredientToAddQuantity.label }),
+        });
 
-      if (existingIngredientIndex !== -1) {
-        const updatedIngredients = [...selectedIngredients];
-        updatedIngredients[existingIngredientIndex].quantity = parseFloat(quantity);
-        setSelectedIngredients(updatedIngredients);
-      } else {
-        const newIngredient = {
-          name: selectedIngredientToAddQuantity.label,
-          quantity: parseFloat(quantity),
-        };
-        setSelectedIngredients([...selectedIngredients, newIngredient]);
+        if (response.ok) {
+          const unitsData = await response.json();
+          const unitsOptions = unitsData.map((unit) => ({ label: unit, value: unit }));
+          setUnitsOptions(unitsOptions);
+        } else {
+          console.error('Error fetching units:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching units:', error);
       }
+    }
+  };
+
+  const handleIngredientSelect = (selectedOption) => {
+    if (selectedOption) {
+      setSelectedIngredientToAddQuantity(selectedOption);
+      setShowQuantityModal(true);
+    }
+  };
+
+  const handleQuantityModalAdd = async (quantity) => {
+    setShowQuantityModal(false);
+    const numericQuantity = parseFloat(quantity);
+    const newIngredient = {
+      name: selectedIngredientToAddQuantity.label,
+      quantity: numericQuantity,
+      unit: unit,
+    };
+    // Modify selectedIngredients based on whether you are editing or adding a new ingredient
+    if (editingIngredientIndex !== null) {
+      const updatedIngredients = [...selectedIngredients];
+      updatedIngredients[editingIngredientIndex] = newIngredient;
+      setSelectedIngredients(updatedIngredients);
+      setEditingIngredientIndex(null);
+    } else {
+      setSelectedIngredients([...selectedIngredients, newIngredient]);
     }
   };
 
@@ -108,17 +144,10 @@ useEffect(() => {
   };
 
   const handleEditClick = () => {
-  setEditModalOpen(true);
-  setEditedTitle(post.title);
-  setEditedDescription(post.description);
-  setSelectedIngredients(post.ingredients || []);
-};
-
-const handleIngredientSelect = (selectedOption) => {
-    if (selectedOption) {
-      setSelectedIngredientToAddQuantity(selectedOption);
-      setShowQuantityModal(true);
-    }
+    setEditModalOpen(true);
+    setEditedTitle(post.title);
+    setEditedDescription(post.description);
+    setSelectedIngredients(post.ingredients || []);
   };
 
   const handleIngredientRemove = (index) => {
@@ -127,77 +156,93 @@ const handleIngredientSelect = (selectedOption) => {
     setSelectedIngredients(updatedIngredients);
   };
 
- const handleSaveChangesClick = () => {
-  // Make a request to update the post with the edited values
-  fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-    body: JSON.stringify({
-      title: editedTitle,
-      description: editedDescription,
-      ingredients: selectedIngredients,
-    }),
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+  const handleSaveChangesClick = () => {
+    // Make a request to update the post with the edited values
+    fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        title: editedTitle,
+        description: editedDescription,
+        ingredients: selectedIngredients,
+      }),
     })
-    .then((updatedPost) => {
-      if (!updatedPost) {
-        console.error('Error updating post');
-        // Handle the error, show a message, or take appropriate action
-      } else {
-        // Update the local state with the updated post
-        setPost(updatedPost);
-        setEditModalOpen(false);
-      }
-    })
-    .catch((error) => console.error('Error updating post:', error));
-};
-
-
-
-const handleEditIngredientClick = (index) => {
-  setEditingIngredientIndex(index === editingIngredientIndex ? null : index);
-};
-
-const handleEditIngredientChange = (e, index, property) => {
-  const updatedIngredients = [...selectedIngredients];
-  updatedIngredients[index][property] = property === 'quantity' ? parseFloat(e.target.value) : e.target.value;
-  setSelectedIngredients(updatedIngredients);
-};
-
-const handleDeleteClick = () => {
-  // Confirm with the user before deleting
-  const confirmDelete = window.confirm("Are you sure you want to delete this post?");
-  
-  if (confirmDelete) {
-    // Make a DELETE request to delete the post
-    fetch(`http://localhost:4000/posts/${postId}`, {
-      method: 'POST',
-    })
-      .then(response => {
+      .then((response) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         return response.json();
       })
-      .then(result => {
-        console.log(result);
-        // Redirect to the posts page 
-        navigate('/posts');
+      .then((updatedPost) => {
+        if (!updatedPost) {
+          console.error('Error updating post');
+          // Handle the error, show a message, or take appropriate action
+        } else {
+          // Update the local state with the updated post
+          setPost(updatedPost);
+          setEditModalOpen(false);
+
+          // Show success alert
+          Swal.fire({
+            icon: 'success',
+            title: 'Post Updated',
+            text: 'Your post has been successfully updated!',
+          });
+        }
       })
-      .catch(error => console.error('Error deleting post:', error));
-  }
-};
+      .catch((error) => {
+        console.error('Error updating post:', error);
+
+        // Show error alert
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred while updating the post.',
+        });
+      });
+  };
+
+
+
+  const handleEditIngredientClick = (index) => {
+    setEditingIngredientIndex(index === editingIngredientIndex ? null : index);
+  };
+
+  const handleEditIngredientChange = (e, index, property) => {
+    const updatedIngredients = [...selectedIngredients];
+    updatedIngredients[index][property] = property === 'quantity' ? parseFloat(e.target.value) : e.target.value;
+    setSelectedIngredients(updatedIngredients);
+  };
+
+  const handleDeleteClick = () => {
+    // Confirm with the user before deleting
+    const confirmDelete = window.confirm("Are you sure you want to delete this post?");
+
+    if (confirmDelete) {
+      // Make a DELETE request to delete the post
+      fetch(`http://localhost:4000/posts/${postId}`, {
+        method: 'POST',
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(result => {
+          console.log(result);
+          // Redirect to the posts page 
+          navigate('/posts');
+        })
+        .catch(error => console.error('Error deleting post:', error));
+    }
+  };
 
   return (
-    <div>
+    <div className='mt-5'>
       <Container>
         <Row>
           <Col lg={{ span: 6, offset: 3 }}>
@@ -247,32 +292,32 @@ const handleDeleteClick = () => {
                   )}
 
                   {editModalOpen && (
-                  <Modal show={editModalOpen} onHide={() => setEditModalOpen(false)}>
-                    <Modal.Header closeButton>
-                      <Modal.Title>Edit Post</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                      <Form>
-                        <Form.Group controlId="editTitle">
-                          <Form.Label>Title</Form.Label>
-                          <Form.Control
-                            type="text"
-                            placeholder="Enter title"
-                            value={editedTitle}
-                            onChange={(e) => setEditedTitle(e.target.value)}
-                          />
-                        </Form.Group>
-                        <Form.Group controlId="editDescription">
-                          <Form.Label>Description</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            placeholder="Enter description"
-                            value={editedDescription}
-                            onChange={(e) => setEditedDescription(e.target.value)}
-                          />
-                        </Form.Group>
-                          
+                    <Modal show={editModalOpen} onHide={() => setEditModalOpen(false)}>
+                      <Modal.Header closeButton>
+                        <Modal.Title>Edit Post</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        <Form>
+                          <Form.Group controlId="editTitle">
+                            <Form.Label>Title</Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Enter title"
+                              value={editedTitle}
+                              onChange={(e) => setEditedTitle(e.target.value)}
+                            />
+                          </Form.Group>
+                          <Form.Group controlId="editDescription">
+                            <Form.Label>Description</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              placeholder="Enter description"
+                              value={editedDescription}
+                              onChange={(e) => setEditedDescription(e.target.value)}
+                            />
+                          </Form.Group>
+
                           <Form.Group controlId="editIngredients">
                             <Form.Label>Ingredients</Form.Label>
                             <Select
@@ -286,7 +331,7 @@ const handleDeleteClick = () => {
                               {selectedIngredients.map((ingredient, index) => (
                                 <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                                   <div>
-                                    {ingredient.name}: {ingredient.quantity}
+                                    {ingredient.name}: {ingredient.quantity} {ingredient.unit}
                                   </div>
                                   <Button
                                     variant="danger"
@@ -300,59 +345,62 @@ const handleDeleteClick = () => {
                               ))}
                             </div>
                           </Form.Group>
-                            
-                      </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                      <div>
-                        <Button variant="secondary" onClick={() => setEditModalOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button variant="primary" onClick={handleSaveChangesClick}>
-                          Save Changes
-                        </Button>
-                      </div>
-                    </Modal.Footer>
-                  </Modal>
-                )}
+
+                        </Form>
+                      </Modal.Body>
+                      <Modal.Footer>
+                        <div>
+                          <Button variant="secondary" onClick={() => setEditModalOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button variant="primary" onClick={handleSaveChangesClick}>
+                            Save Changes
+                          </Button>
+                        </div>
+                      </Modal.Footer>
+                    </Modal>
+                  )}
 
                   <Button variant="primary" onClick={handleBackClick}>
                     Back
                   </Button>
                 </Card.Body>
-              
-              {showQuantityModal && (
-                <>
-                <Modal show={showQuantityModal} onHide={handleQuantityModalCancel}>
-                  <Modal.Header closeButton>
-                    <Modal.Title>Add Ingredient Quantity</Modal.Title>
-                  </Modal.Header>
-                  <Modal.Body>
-                    
-                    <Form.Control
-                      type="number"
-                      placeholder={`Enter quantity for ${selectedIngredientToAddQuantity?.label}`}
-                      onChange={(e) => setQuantityInput(e.target.value)}
-                    />
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="secondary" onClick={handleQuantityModalCancel}>
-                      Cancel
-                    </Button>
-                    <Button variant="primary" onClick={() => handleQuantityModalAdd(quantityInput)}>
-                      Add
-                    </Button>
-                  </Modal.Footer>
-                </Modal>
-                </>
-              )}
+
+                {showQuantityModal && (
+                  <Modal show={showQuantityModal} onHide={handleQuantityModalCancel}>
+                    <Modal.Header closeButton>
+                      <Modal.Title>Add/Edit Ingredient Quantity</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <Form.Control
+                        type="number"
+                        placeholder={`Enter quantity for ${selectedIngredientToAddQuantity?.label}`}
+                        onChange={(e) => setQuantityInput(e.target.value)}
+                      />
+                      <Select
+                        isSearchable
+                        isClearable
+                        placeholder="Select unit"
+                        options={unitsOptions}
+                        onChange={(selectedOption) => setUnit(selectedOption?.value)}
+                      />
+                    </Modal.Body>
+                    <Modal.Footer>
+                      <Button variant="secondary" onClick={handleQuantityModalCancel}>
+                        Cancel
+                      </Button>
+                      <Button variant="primary" onClick={() => handleQuantityModalAdd(quantityInput)}>
+                        Add/Edit
+                      </Button>
+                    </Modal.Footer>
+                  </Modal>
+                )}
               </Card>
             ) : (
               <p>Loading post details...</p>
             )}
           </Col>
         </Row>
-
       </Container>
     </div>
   );
