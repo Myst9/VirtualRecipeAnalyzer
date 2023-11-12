@@ -26,6 +26,7 @@ export default function AppNavbar() {
         .then((response) => response.json())
         .then((userData) => {
           setUserDetails(userData); // Assuming the server returns an object with 'username' and 'email' properties
+          setShowProfile(false);
         })
         .catch((error) => {
           console.error('Error fetching user data:', error);
