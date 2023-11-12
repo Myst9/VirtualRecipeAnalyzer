@@ -29,6 +29,7 @@ const nutrientCategories = {
     'Thiamin',
     'Riboflavin',
     'Niacin',
+    'Vitamin A, IU',
     'Vitamin B-6',
     'Vitamin B-12',
     'Vitamin B-12, added',
@@ -93,6 +94,7 @@ const nutrientCategories = {
     'Zinc, Zn',
     'Copper, Cu',
     'Selenium, Se',
+    'Manganese, Mn'
   ],
   Carbohydrates: [
     'Carbohydrate, by difference',
@@ -101,10 +103,30 @@ const nutrientCategories = {
     'Starch',
     'Net carbs',
   ],
-  'Proteins and Aminoacids': ['Protein'],
+  'Proteins and Aminoacids':
+    ['Protein',
+      'Tryptophan',
+      'Threonine',
+      'Isoleucine',
+      'Leucine',
+      'Lysine',
+      'Methionine',
+      'Cystine',
+      'Phenylalanine',
+      'Tyrosine',
+      'Valine',
+      'Arginine',
+      'Histidine',
+      'Alanine',
+      'Aspartic acid',
+      'Glutamic acid',
+      'Glycine',
+      'Proline',
+      'Serine'
+    ],
   Sterols: ['Cholesterol'],
   Other: ['Alcohol, ethyl', 'Water', 'Caffeine', 'Theobromine'],
-  Energy: [],
+  Energy: []
 };
 
 export default function Recipes() {
@@ -115,6 +137,8 @@ export default function Recipes() {
   const [ingredients, setIngredients] = useState([]);
   const [ingredientUnits, setIngredientUnits] = useState([]);
   const [similarRecipes, setSimilarRecipes] = useState([]);
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -154,42 +178,42 @@ export default function Recipes() {
   const handleIngredientSelect = (ingredient) => {
     setIngredientToSelect(ingredient);
     fetch('http://localhost:4000/recipes/get-units', {
-    method: 'POST',
-    body: JSON.stringify({ name: ingredient.name }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      setIngredientUnits(data);
+      method: 'POST',
+      body: JSON.stringify({ name: ingredient.name }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
-    .catch((error) => {
-      console.error('Error fetching units:', error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        setIngredientUnits(data);
+      })
+      .catch((error) => {
+        console.error('Error fetching units:', error);
+      });
   };
 
   const handleAddIngredient = (quantity) => {
-  if (quantity !== null && quantity !== '') {
-    // Check if the ingredient is already in selectedIngredients
-    const existingIngredientIndex = selectedIngredients.findIndex(
-      (ingredient) => ingredient.name === ingredientToSelect.name
-    );
+    if (quantity !== null && quantity !== '') {
+      // Check if the ingredient is already in selectedIngredients
+      const existingIngredientIndex = selectedIngredients.findIndex(
+        (ingredient) => ingredient.name === ingredientToSelect.name
+      );
 
-    if (existingIngredientIndex !== -1) {
-      const updatedIngredients = [...selectedIngredients];
-      updatedIngredients[existingIngredientIndex].quantity = quantity;
-      updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
+      if (existingIngredientIndex !== -1) {
+        const updatedIngredients = [...selectedIngredients];
+        updatedIngredients[existingIngredientIndex].quantity = quantity;
+        updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
 
-      setSelectedIngredients(updatedIngredients);
-    } else {
-      const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
-      setSelectedIngredients([...selectedIngredients, newIngredient]);
+        setSelectedIngredients(updatedIngredients);
+      } else {
+        const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
+        setSelectedIngredients([...selectedIngredients, newIngredient]);
+      }
+
+      setIngredientToSelect(null);
     }
-
-    setIngredientToSelect(null);
-  }
-};
+  };
 
   const clearNutritionalDetails = () => {
     setNutritionalDetails(null);
@@ -255,9 +279,9 @@ export default function Recipes() {
       .then((data) => {
         const postIdsString = data.join(',');
 
-    // Redirect to the new page with postIds as query parameters
-    navigate(`/similar-recipes?postIds=${postIdsString}`);
-        })
+        // Redirect to the new page with postIds as query parameters
+        navigate(`/similar-recipes?postIds=${postIdsString}`);
+      })
       .catch((error) => {
         console.error(error);
       });
@@ -305,18 +329,54 @@ export default function Recipes() {
   };
 
   const thStyle = {
-  backgroundColor: '#343a40', // Background color for table headers
-  color: 'white', // Text color for table headers
-  padding: '8px',
-  fontWeight: 'bold',
-  borderBottom: '1px solid #ddd',
-};
+    backgroundColor: '#343a40', // Background color for table headers
+    color: 'white', // Text color for table headers
+    padding: '8px',
+    fontWeight: 'bold',
+    borderBottom: '1px solid #ddd',
+  };
 
-const tdStyle = {
-  border: '1px solid #ddd',
-  padding: '8px',
-  borderBottom: '1px solid #ddd',
-};
+  const tdStyle = {
+    border: '1px solid #ddd',
+    padding: '8px',
+    borderBottom: '1px solid #ddd',
+  };
+
+  const calculateTotalWeight = (category) => {
+    if (nutritionalDetails) {
+      const totalWeight = categorizedNutrients[category].reduce(
+        (total, detail) => total + convertToMilligrams(detail.nutrientAmount, detail.nutrientUnit),
+        0
+      );
+      const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
+      return `${formattedTotalWeight} mg`;
+    }
+    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+  
+    // Function to convert various units to milligrams
+    function convertToMilligrams(amount, unit) {
+      const unitConversions = {
+        'g': 1e3,      
+        'mg': 1,       
+        'µg': 1e-3    
+      };
+  
+      return amount * unitConversions[unit] || 0;
+    }
+  };
+  
+  
+  
+  
+  
+
+  const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
+  const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
+  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalVitaminsWeight = calculateTotalWeight('Vitamins');
+  const totalMineralsWeight = calculateTotalWeight('Minerals');
+  const totalEnergy = calculateTotalWeight('Energy');
+  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalProteinWeight;
 
   return (
     <div className="recipe-container">
@@ -472,7 +532,63 @@ const tdStyle = {
             </div>
           </div>
         </div>
-
+        
+        <div className="total-weight-section">
+          <h2>Total Nutritional Weights</h2>
+          <table className="table">
+            <thead>
+              <tr>
+                <th style={thStyle}>Category</th>
+                <th style={thStyle}>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Protein Weight</td>
+                <td>{totalProteinWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Carbohydrate Weight</td>
+                <td>{totalCarbohydrateWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Fat Weight</td>
+                <td>{totalFatWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Vitamins Weight</td>
+                <td>{totalVitaminsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Minerals Weight</td>
+                <td>{totalMineralsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Energy</td>
+                <td>{totalEnergy} </td>
+              </tr>
+            </tbody>
+          </table>
+          <button
+            onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            }}
+          >
+            {showAdditionalDetails ? 'Hide Details' : 'View More'}
+          </button>
+          {/* <div className="pie-chart">
+            <Pie data={pieChartData} />
+          </div> */}
+        </div>
 
 
         <div className="nutritional-details-section">
@@ -495,104 +611,104 @@ const tdStyle = {
                 <p>Analyzing Recipe...Scroll down for the nutritional analysis</p>
               </Modal>
             </div>
-          ) : (
-            <div>
+          ) : showAdditionalDetails ? (
+            <div className="additional-details">
               <h2>Nutritional Details</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {Object.keys(categorizedNutrients).map((category) => (
                   <div key={category} style={{ flex: '1', minWidth: '400px', margin: '10px' }}>
-  <h3>{category}</h3>
-  <div style={{ width: '100%' }}>
-    <table className="table table-bordered" style={tableStyle}>
-    <thead className="thead-light">
-      <tr>
-        <th style={thStyle}>Nutrient Name</th>
-        <th style={thStyle}>Amount</th>
-        <th style={thStyle}>Unit</th>
-      </tr>
-    </thead>
-    <tbody>
-      {categorizedNutrients[category].map((detail, index) => (
-        <tr key={index}>
-          <td style={tdStyle}>{detail.nutrientName}</td>
-          <td style={tdStyle}>{detail.nutrientAmount}</td>
-          <td style={tdStyle}>{detail.nutrientUnit}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  </div>
-</div>
+                    <h3>{category}</h3>
+                    <div style={{ width: '100%' }}>
+                      <table className="table table-bordered" style={tableStyle}>
+                        <thead className="thead-light">
+                          <tr>
+                            <th style={thStyle}>Nutrient Name</th>
+                            <th style={thStyle}>Amount</th>
+                            <th style={thStyle}>Unit</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {categorizedNutrients[category].map((detail, index) => (
+                            <tr key={index}>
+                              <td style={tdStyle}>{detail.nutrientName}</td>
+                              <td style={tdStyle}>{detail.nutrientAmount}</td>
+                              <td style={tdStyle}>{detail.nutrientUnit}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
       <Modal
-  isOpen={!!ingredientToSelect}
-  onRequestClose={() => setIngredientToSelect(null)}
-  contentLabel="Enter Quantity"
-  style={modalStyles}
->
-  <h2 style={{ fontSize: '15px' }}>Enter Quantity for {ingredientToSelect?.name}:</h2>
-  <input
-    type="number"
-    value={ingredientToSelect?.quantity || ''}
-    onChange={(e) => {
-      const quantity = e.target.value;
-      setIngredientToSelect({ ...ingredientToSelect, quantity });
-    }}
-  />
-  <div className="mt-3">
-    <select
-      value={ingredientToSelect?.selectedUnit || ''}
-      onChange={(e) => {
-        const selectedUnit = e.target.value;
-        setIngredientToSelect({ ...ingredientToSelect, selectedUnit });
-      }}
-    >
-      <option value="">Select Unit</option>
-      {ingredientUnits.map((unit, index) => (
-        <option key={index} value={unit}>{unit}</option>
-      ))}
-    </select>
-    <button
-      onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
-      style={{
-        backgroundColor: '#007bff',
-        color: 'white',
-        borderRadius: '4px',
-        padding: '10px 20px',
-        border: 'none',
-        cursor: 'pointer',
-        outline: 'none',
-        fontWeight: 'bold',
-        fontSize: '16px',
-      }}
-    >
-      Add
-    </button>
-    <button
-      onClick={() => setIngredientToSelect(null)}
-      style={{
-        backgroundColor: '#FF6865',
-        color: 'white',
-        borderRadius: '4px',
-        padding: '10px 20px',
-        border: 'none',
-        cursor: 'pointer',
-        outline: 'none',
-        fontWeight: 'bold',
-        fontSize: '16px',
-        marginLeft: '10px',
-      }}
-    >
-      Cancel
-    </button>
-  </div>
-</Modal>
+        isOpen={!!ingredientToSelect}
+        onRequestClose={() => setIngredientToSelect(null)}
+        contentLabel="Enter Quantity"
+        style={modalStyles}
+      >
+        <h2 style={{ fontSize: '15px' }}>Enter Quantity for {ingredientToSelect?.name}:</h2>
+        <input
+          type="number"
+          value={ingredientToSelect?.quantity || ''}
+          onChange={(e) => {
+            const quantity = e.target.value;
+            setIngredientToSelect({ ...ingredientToSelect, quantity });
+          }}
+        />
+        <div className="mt-3">
+          <select
+            value={ingredientToSelect?.selectedUnit || ''}
+            onChange={(e) => {
+              const selectedUnit = e.target.value;
+              setIngredientToSelect({ ...ingredientToSelect, selectedUnit });
+            }}
+          >
+            <option value="">Select Unit</option>
+            {ingredientUnits.map((unit, index) => (
+              <option key={index} value={unit}>{unit}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            }}
+          >
+            Add
+          </button>
+          <button
+            onClick={() => setIngredientToSelect(null)}
+            style={{
+              backgroundColor: '#FF6865',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+              marginLeft: '10px',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
