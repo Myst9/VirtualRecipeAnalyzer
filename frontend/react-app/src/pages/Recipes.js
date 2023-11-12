@@ -220,26 +220,28 @@ export default function Recipes() {
   
 
   const handleAddIngredient = (quantity) => {
-    if (quantity !== null && quantity !== '') {
-      // Check if the ingredient is already in selectedIngredients
-      const existingIngredientIndex = selectedIngredients.findIndex(
-        (ingredient) => ingredient.name === ingredientToSelect.name
-      );
-
-      if (existingIngredientIndex !== -1) {
-        const updatedIngredients = [...selectedIngredients];
-        updatedIngredients[existingIngredientIndex].quantity = quantity;
-        updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
-
-        setSelectedIngredients(updatedIngredients);
-      } else {
-        const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
-        setSelectedIngredients([...selectedIngredients, newIngredient]);
-      }
-
-      setIngredientToSelect(null);
+    // If quantity is not entered, set it to zero
+    const quantityValue = quantity === '' || isNaN(parseFloat(quantity)) ? 0 : parseFloat(quantity);
+  
+    // Check if the ingredient is already in selectedIngredients
+    const existingIngredientIndex = selectedIngredients.findIndex(
+      (ingredient) => ingredient.name === ingredientToSelect.name
+    );
+  
+    if (existingIngredientIndex !== -1) {
+      const updatedIngredients = [...selectedIngredients];
+      updatedIngredients[existingIngredientIndex].quantity = quantityValue;
+      updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
+  
+      setSelectedIngredients(updatedIngredients);
+    } else {
+      const newIngredient = { ...ingredientToSelect, quantity: quantityValue, unit: ingredientToSelect.selectedUnit };
+      setSelectedIngredients([...selectedIngredients, newIngredient]);
     }
+  
+    setIngredientToSelect(null);
   };
+  
 
   const clearNutritionalDetails = () => {
     setNutritionalDetails(null);

@@ -18,6 +18,10 @@ const postSchema = new mongoose.Schema({
 			quantity: {
 				type: Number,
 				required: [true, "Number is required."]
+			},
+			unit: {
+				type: String,
+				default: "g"
 			}
 		}
 	],

@@ -6,8 +6,6 @@ import Select from 'react-select';
 
 export default function AddPost() {
   const navigate = useNavigate();
-
-  const [userId, setUserId] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState(null);
@@ -17,24 +15,28 @@ export default function AddPost() {
   const [selectedIngredientToAddQuantity, setSelectedIngredientToAddQuantity] = useState(null);
   const [quantityInput, setQuantityInput] = useState('');
   const [user, setUser] = useState(null);
+  const [unitsOptions, setUnitsOptions] = useState([]);
+  const [unit, setUnit] = useState('');
 
-useEffect(() => {
-  // Make a request to your backend to get the user's information
-  fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`,
-    },
-  })
-    .then((response) => response.json())
-    .then((userData) => {
-      setUser(userData); 
-      console.log(userData);
+
+
+  useEffect(() => {
+    // Make a request to your backend to get the user's information
+    fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
     })
-    .catch((error) => {
-      console.error('Error fetching user data:', error);
-    });
-}, []);
+      .then((response) => response.json())
+      .then((userData) => {
+        setUser(userData);
+        console.log(userData);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+      });
+  }, []);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_URL}/recipes/ingredient-names`)
@@ -52,7 +54,7 @@ useEffect(() => {
   }, []);
 
   const handleBackClick = () => {
-    navigate(-1); 
+    navigate(-1);
   };
 
   const handleImageChange = (e) => {
@@ -60,34 +62,54 @@ useEffect(() => {
     setImageFile(file);
   };
 
-  const handleIngredientSelect = (selectedOption) => {
-    if (selectedOption) {
-      setSelectedIngredientToAddQuantity(selectedOption);
-      setShowQuantityModal(true);
-    }
-  };
+const fetchUnits = async () => {
+  if (selectedIngredientToAddQuantity) {
+    try {
+      // Fetch units for the selected ingredient
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/recipes/get-units`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ name: selectedIngredientToAddQuantity.label }),
+      });
 
-  const handleQuantityModalAdd = (quantity) => {
-    setShowQuantityModal(false);
-
-    if (selectedIngredientToAddQuantity) {
-      const existingIngredientIndex = selectedIngredients.findIndex(
-        (ingredient) => ingredient.name === selectedIngredientToAddQuantity.label
-      );
-
-      if (existingIngredientIndex !== -1) {
-        const updatedIngredients = [...selectedIngredients];
-        updatedIngredients[existingIngredientIndex].quantity = parseFloat(quantity);
-        setSelectedIngredients(updatedIngredients);
+      if (response.ok) {
+        const unitsData = await response.json();
+        const unitsOptions = unitsData.map((unit) => ({ label: unit, value: unit }));
+        setUnitsOptions(unitsOptions);
       } else {
-        const newIngredient = {
-          name: selectedIngredientToAddQuantity.label,
-          quantity: parseFloat(quantity),
-        };
-        setSelectedIngredients([...selectedIngredients, newIngredient]);
+        console.error('Error fetching units:', response.statusText);
       }
+    } catch (error) {
+      console.error('Error fetching units:', error);
     }
+  }
+};
+
+useEffect(() => {
+  fetchUnits();
+}, [selectedIngredientToAddQuantity]); // Run this effect when selectedIngredientToAddQuantity changes
+
+const handleIngredientSelect = async (selectedOption) => {
+  if (selectedOption) {
+    setSelectedIngredientToAddQuantity(selectedOption);
+    setShowQuantityModal(true);
+  }
+};
+
+const handleQuantityModalAdd = async (quantity) => {
+  setShowQuantityModal(false);
+  const numericQuantity = parseFloat(quantity);
+  const newIngredient = {
+    name: selectedIngredientToAddQuantity.label,
+    quantity: numericQuantity,
+    unit: unit
   };
+  setSelectedIngredients([...selectedIngredients, newIngredient]);
+};
+
 
   const handleQuantityModalCancel = () => {
     setShowQuantityModal(false);
@@ -113,6 +135,7 @@ useEffect(() => {
     const ingredientsData = selectedIngredients.map((ingredient) => ({
       name: ingredient.name,
       quantity: ingredient.quantity,
+      unit: ingredient.unit,
     }));
 
     formData.append('ingredients', JSON.stringify(ingredientsData));
@@ -160,12 +183,12 @@ useEffect(() => {
               <Form onSubmit={(e) => addPost(e)}>
                 <Form.Group className="mb-3" controlId="form.Name">
                   <Form.Label className="text-center">User</Form.Label>
-  <Form.Control
-    type="text"
-    placeholder={user ? user.name : ''}
-    value={user ? user.name : ''}
-    readOnly
-  />
+                  <Form.Control
+                    type="text"
+                    placeholder={user ? user.name : ''}
+                    value={user ? user.name : ''}
+                    readOnly
+                  />
                 </Form.Group>
                 <Form.Group className="mb-3">
                   <Form.Label className="text-center" controlId="form.Title">
@@ -198,17 +221,17 @@ useEffect(() => {
                     />
                   </Form.Group>
                   <Select
-            isSearchable
-            isClearable
-            placeholder="Select an ingredient"
-            options={ingredientOptions}
-            onChange={handleIngredientSelect}
-          />
+                    isSearchable
+                    isClearable
+                    placeholder="Select an ingredient"
+                    options={ingredientOptions}
+                    onChange={handleIngredientSelect}
+                  />
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     {selectedIngredients.map((ingredient, index) => (
                       <div key={index} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                         <div>
-                          {ingredient.name}: {ingredient.quantity}
+                        {`${ingredient.name}: ${ingredient.quantity} ${ingredient.unit}`}
                         </div>
                         <Button
                           variant="danger"
@@ -221,15 +244,16 @@ useEffect(() => {
                       </div>
                     ))}
                   </div>
+
                 </Form.Group>
                 <div className="d-flex justify-content-between">
-								  <Button variant="primary" onClick={handleBackClick}>
-								    Back
-								  </Button>
-								  <Button variant="primary" type="submit">
-								    Post
-								  </Button>
-								</div>
+                  <Button variant="primary" onClick={handleBackClick}>
+                    Back
+                  </Button>
+                  <Button variant="primary" type="submit">
+                    Post
+                  </Button>
+                </div>
 
               </Form>
             </Card.Body>
@@ -241,18 +265,25 @@ useEffect(() => {
           <Modal.Title>Add Ingredient Quantity</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          
+
           <Form.Control
             type="number"
             placeholder={`Enter quantity for ${selectedIngredientToAddQuantity?.label}`}
             onChange={(e) => setQuantityInput(e.target.value)}
+          />
+          <Select
+            isSearchable
+            isClearable
+            placeholder="Select unit"
+            options={unitsOptions}
+            onChange={(selectedOption) => setUnit(selectedOption?.value)}
           />
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleQuantityModalCancel}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={() => handleQuantityModalAdd(quantityInput)}>
+          <Button variant="primary" onClick={() => handleQuantityModalAdd(quantityInput, unit)}>
             Add
           </Button>
         </Modal.Footer>

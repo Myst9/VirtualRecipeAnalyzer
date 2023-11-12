@@ -223,7 +223,7 @@ const handleDeleteClick = () => {
                     {post.ingredients ? (
                       post.ingredients.map((ingredient, index) => (
                         <li key={index}>
-                          {ingredient.name}: {ingredient.quantity} grams
+                          {ingredient.name}: {ingredient.quantity} {ingredient.unit}
                         </li>
                       ))
                     ) : (
