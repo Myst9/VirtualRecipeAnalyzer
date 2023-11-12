@@ -19,8 +19,8 @@ export default function AppNavbar() {
         <Navbar.Collapse id="basic-navbar-nav" style={{ color: '#fff' }}>
           <Nav className="mr-auto">
             <Nav.Link as={NavLink} to="/" style={{ color: '#fff' }}>Home</Nav.Link>
-            <Nav.Link as={NavLink} to="/recipes" style={{ color: '#fff' }}>Recipes</Nav.Link>
-            <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }}>Posts</Nav.Link>
+            <Nav.Link as={NavLink} to="/recipes" style={{ color: '#fff' }}>Analyze</Nav.Link>
+            <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }}>Recipes</Nav.Link>
             
             {
               user.id ?

@@ -21,7 +21,7 @@ module.exports.analyzeRecipe = async (data) => {
             if (surveyFood) {
                 // Determine the appropriate unit and weight from portionDescription
                 let unit = 'g'; // Default to grams
-                let weight = 100; // Default to 100 grams
+                let weight = 1; // Default to 100 grams
 
                 if (ingredient.unit && ingredient.unit !== 'g') {
                     const portion = surveyFood.foodPortions.find((portion) => portion.portionDescription.toLowerCase() === ingredient.unit.toLowerCase());

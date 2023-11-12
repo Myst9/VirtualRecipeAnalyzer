@@ -14,6 +14,14 @@ export default function Home() {
     label: "Analyze Now!"
   };
 
+  useEffect(() => {
+    document.body.style.backgroundImage = `url(/brooke-lark-6.jpg)`;
+
+    return () => {
+      document.body.style.backgroundImage = null;
+    };
+  }, []);
+
   const [limitedPosts, setLimitedPosts] = useState([]);
 
   useEffect(() => {
@@ -29,15 +37,17 @@ export default function Home() {
   return (
     <div className="pageContainer">
       <Banner data={data} />
+      
       <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>
-    <h1>Discover Trending Recipes</h1>
-    <div style={{ marginLeft: 'auto' }}>
-      <Link to="/post" className="arrow-link">
-        <span style={{ fontSize: '15px' }}>Discover more</span>
-        <span className="arrow-icon">→</span>
-      </Link>
-    </div>
-  </div>
+        <h1 style={{ color: 'white' }}>Discover Trending Recipes</h1>
+        <div style={{ marginLeft: 'auto' }}>
+          <Link to="/post" className="arrow-link">
+            <span style={{ fontSize: '15px' }}>Discover more</span>
+            <span className="arrow-icon">→</span>
+          </Link>
+        </div>
+      </div>
+
       <Container>
         <Row className="mb-3">
           {limitedPosts.map(post => (

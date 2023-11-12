@@ -9,6 +9,14 @@ import { useState, useEffect } from 'react';
 
 
 export default function Post() {
+
+  useEffect(() => {
+		document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
+		
+		return () => {
+		  document.body.style.backgroundImage = null;
+		};
+	  }, []);
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 

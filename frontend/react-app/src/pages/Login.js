@@ -8,6 +8,14 @@ import '../App.css';
 
 export default function Login(props){
 
+	useEffect(() => {
+		document.body.style.backgroundImage = `url(/jay.jpg)`;
+		
+		return () => {
+		  document.body.style.backgroundImage = null;
+		};
+	  }, []);
+
 	// Allows us to consume the User Context object and it's properties to use for user validation.
 	const { user, setUser } = useContext(UserContext);
 

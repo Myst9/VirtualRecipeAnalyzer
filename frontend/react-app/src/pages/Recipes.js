@@ -111,10 +111,8 @@ export default function Recipes() {
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [ingredientToSelect, setIngredientToSelect] = useState(null);
   const [nutritionalDetails, setNutritionalDetails] = useState(null);
-  const [bowlImages, setBowlImages] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [ingredientUnits, setIngredientUnits] = useState([]);
-  const [similarRecipes, setSimilarRecipes] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -151,45 +149,66 @@ export default function Recipes() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  const Button = ({ onClick, disabled, label, color }) => (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        backgroundColor: disabled ? '#ccc' : color,
+        color: 'white',
+        borderRadius: '4px',
+        padding: '10px 20px',
+        border: 'none',
+        cursor: 'pointer',
+        outline: 'none',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        marginLeft: '10px',
+      }}
+    >
+      {label}
+    </button>
+  );
+
   const handleIngredientSelect = (ingredient) => {
     setIngredientToSelect(ingredient);
     fetch('http://localhost:4000/recipes/get-units', {
-    method: 'POST',
-    body: JSON.stringify({ name: ingredient.name }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      setIngredientUnits(data);
+      method: 'POST',
+      body: JSON.stringify({ name: ingredient.name }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
-    .catch((error) => {
-      console.error('Error fetching units:', error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        setIngredientUnits(data);
+      })
+      .catch((error) => {
+        console.error('Error fetching units:', error);
+      });
   };
 
   const handleAddIngredient = (quantity) => {
-  if (quantity !== null && quantity !== '') {
-    // Check if the ingredient is already in selectedIngredients
-    const existingIngredientIndex = selectedIngredients.findIndex(
-      (ingredient) => ingredient.name === ingredientToSelect.name
-    );
+    if (quantity !== null && quantity !== '') {
+      // Check if the ingredient is already in selectedIngredients
+      const existingIngredientIndex = selectedIngredients.findIndex(
+        (ingredient) => ingredient.name === ingredientToSelect.name
+      );
 
-    if (existingIngredientIndex !== -1) {
-      const updatedIngredients = [...selectedIngredients];
-      updatedIngredients[existingIngredientIndex].quantity = quantity;
-      updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
+      if (existingIngredientIndex !== -1) {
+        const updatedIngredients = [...selectedIngredients];
+        updatedIngredients[existingIngredientIndex].quantity = quantity;
+        updatedIngredients[existingIngredientIndex].unit = ingredientToSelect.selectedUnit;
 
-      setSelectedIngredients(updatedIngredients);
-    } else {
-      const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
-      setSelectedIngredients([...selectedIngredients, newIngredient]);
+        setSelectedIngredients(updatedIngredients);
+      } else {
+        const newIngredient = { ...ingredientToSelect, quantity, unit: ingredientToSelect.selectedUnit };
+        setSelectedIngredients([...selectedIngredients, newIngredient]);
+      }
+
+      setIngredientToSelect(null);
     }
-
-    setIngredientToSelect(null);
-  }
-};
+  };
 
   const clearNutritionalDetails = () => {
     setNutritionalDetails(null);
@@ -255,9 +274,9 @@ export default function Recipes() {
       .then((data) => {
         const postIdsString = data.join(',');
 
-    // Redirect to the new page with postIds as query parameters
-    navigate(`/similar-recipes?postIds=${postIdsString}`);
-        })
+        // Redirect to the new page with postIds as query parameters
+        navigate(`/similar-recipes?postIds=${postIdsString}`);
+      })
       .catch((error) => {
         console.error(error);
       });
@@ -305,32 +324,39 @@ export default function Recipes() {
   };
 
   const thStyle = {
-  backgroundColor: '#343a40', // Background color for table headers
-  color: 'white', // Text color for table headers
-  padding: '8px',
-  fontWeight: 'bold',
-  borderBottom: '1px solid #ddd',
-};
+    backgroundColor: '#343a40', // Background color for table headers
+    color: 'white', // Text color for table headers
+    padding: '8px',
+    fontWeight: 'bold',
+    borderBottom: '1px solid #ddd',
+  };
 
-const tdStyle = {
-  border: '1px solid #ddd',
-  padding: '8px',
-  borderBottom: '1px solid #ddd',
-};
+  const tdStyle = {
+    border: '1px solid #ddd',
+    padding: '8px',
+    borderBottom: '1px solid #ddd',
+  };
 
   return (
     <div className="recipe-container">
 
       <div className="ingredients-container" >
-        <div className="up-container" style={{ display: 'flex', flexDirection: 'row' }}>
-          <div className="ingredients-section">
-            <h2>Ingredients</h2>
+        <div className="up-container" style={{ display: 'flex', flexDirection: 'row', color: 'white', paddingTop: '20px' }}>
+          <div className="ingredients-section ">
+            {/* <h2 style={{ padding : '10px'}}>Ingredients</h2> */}
             <div className="ingredient-search">
               <input
                 type="text"
                 placeholder="Search ingredients"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  padding: '8px',
+                  fontSize: '16px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  marginRight: '0px',
+                }}
               />
               <button
                 onClick={() => setSearchQuery('')}
@@ -338,13 +364,13 @@ const tdStyle = {
                   backgroundColor: '#007bff',
                   color: 'white',
                   borderRadius: '4px',
-                  padding: '2px 10px',
+                  padding: '8px 16px',
                   border: 'none',
                   cursor: 'pointer',
                   outline: 'none',
                   fontWeight: 'bold',
                   fontSize: '16px',
-                  marginLeft: '10px',
+                  marginRight: '25px'
                 }}
               >
                 Clear
@@ -376,7 +402,7 @@ const tdStyle = {
           </div>
 
           <div className="selected-ingredient-section">
-            <h2>Selected Ingredients</h2>
+            <h2 style={{ textAlign: 'center' }}>Selected Ingredients</h2>
             <div className="selected-ingredient-list" style={{ width: '1100px', height: '550px', overflowY: 'scroll', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginTop: '20px' }}>
               {selectedIngredients.map((ingredient, index) => (
                 <div key={index} className="selected-ingredient" style={{ marginRight: '10px', marginBottom: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -417,58 +443,24 @@ const tdStyle = {
             </div>
 
             <div className="analysis-section" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'right' }}>
-              <button
+              <Button
                 onClick={handleFindRecipe}
                 disabled={selectedIngredients.length === 0}
-                style={{
-                  backgroundColor:
-                    selectedIngredients.length === 0 ? '#ccc' : '#007bff',
-                  color: 'white',
-                  borderRadius: '4px',
-                  padding: '10px 20px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                }}
-              >
-                Find Recipes
-              </button>
-              <button
+                label="Find Recipes"
+                color="#007bff"
+              />
+              <Button
                 onClick={handleAnalyzeRecipe}
                 disabled={selectedIngredients.length === 0}
-                style={{
-                  backgroundColor:
-                    selectedIngredients.length === 0 ? '#ccc' : '#007bff',
-                  color: 'white',
-                  borderRadius: '4px',
-                  padding: '10px 20px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                }}
-              >
-                Analyze Recipe
-              </button>
-              <button
+                label="Analyze"
+                color="#007bff"
+              />
+              <Button
                 onClick={handleClearAll}
-                style={{
-                  backgroundColor: '#e63e3e',
-                  color: 'white',
-                  borderRadius: '4px',
-                  padding: '10px 20px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  outline: 'none',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                }}
-              >
-                Clear All
-              </button>
+                disabled={selectedIngredients.length === 0}
+                label="Clear All"
+                color="#e63e3e"
+              />
             </div>
           </div>
         </div>
@@ -496,33 +488,33 @@ const tdStyle = {
               </Modal>
             </div>
           ) : (
-            <div>
+            <div style={{ color: 'white' }}>
               <h2>Nutritional Details</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {Object.keys(categorizedNutrients).map((category) => (
                   <div key={category} style={{ flex: '1', minWidth: '400px', margin: '10px' }}>
-  <h3>{category}</h3>
-  <div style={{ width: '100%' }}>
-    <table className="table table-bordered" style={tableStyle}>
-    <thead className="thead-light">
-      <tr>
-        <th style={thStyle}>Nutrient Name</th>
-        <th style={thStyle}>Amount</th>
-        <th style={thStyle}>Unit</th>
-      </tr>
-    </thead>
-    <tbody>
-      {categorizedNutrients[category].map((detail, index) => (
-        <tr key={index}>
-          <td style={tdStyle}>{detail.nutrientName}</td>
-          <td style={tdStyle}>{detail.nutrientAmount}</td>
-          <td style={tdStyle}>{detail.nutrientUnit}</td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  </div>
-</div>
+                    <h3>{category}</h3>
+                    <div style={{ width: '100%' }}>
+                      <table className="table table-bordered" style={tableStyle}>
+                        <thead className="thead-light">
+                          <tr>
+                            <th style={thStyle}>Nutrient Name</th>
+                            <th style={thStyle}>Amount</th>
+                            <th style={thStyle}>Unit</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {categorizedNutrients[category].map((detail, index) => (
+                            <tr key={index}>
+                              <td style={tdStyle}>{detail.nutrientName}</td>
+                              <td style={tdStyle}>{detail.nutrientAmount}</td>
+                              <td style={tdStyle}>{detail.nutrientUnit}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -531,68 +523,102 @@ const tdStyle = {
       </div>
 
       <Modal
-  isOpen={!!ingredientToSelect}
-  onRequestClose={() => setIngredientToSelect(null)}
-  contentLabel="Enter Quantity"
-  style={modalStyles}
->
-  <h2 style={{ fontSize: '15px' }}>Enter Quantity for {ingredientToSelect?.name}:</h2>
-  <input
-    type="number"
-    value={ingredientToSelect?.quantity || ''}
-    onChange={(e) => {
-      const quantity = e.target.value;
-      setIngredientToSelect({ ...ingredientToSelect, quantity });
+    isOpen={!!ingredientToSelect}
+    onRequestClose={() => setIngredientToSelect(null)}
+    contentLabel="Enter Quantity"
+    style={{
+      content: {
+        width: '350px',
+        height: '250px',
+        margin: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: '8px',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+      },
+      overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      },
     }}
-  />
-  <div className="mt-3">
-    <select
-      value={ingredientToSelect?.selectedUnit || ''}
-      onChange={(e) => {
-        const selectedUnit = e.target.value;
-        setIngredientToSelect({ ...ingredientToSelect, selectedUnit });
-      }}
-    >
-      <option value="">Select Unit</option>
-      {ingredientUnits.map((unit, index) => (
-        <option key={index} value={unit}>{unit}</option>
-      ))}
-    </select>
-    <button
-      onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
-      style={{
-        backgroundColor: '#007bff',
-        color: 'white',
-        borderRadius: '4px',
-        padding: '10px 20px',
-        border: 'none',
-        cursor: 'pointer',
-        outline: 'none',
-        fontWeight: 'bold',
-        fontSize: '16px',
-      }}
-    >
-      Add
-    </button>
-    <button
-      onClick={() => setIngredientToSelect(null)}
-      style={{
-        backgroundColor: '#FF6865',
-        color: 'white',
-        borderRadius: '4px',
-        padding: '10px 20px',
-        border: 'none',
-        cursor: 'pointer',
-        outline: 'none',
-        fontWeight: 'bold',
-        fontSize: '16px',
-        marginLeft: '10px',
-      }}
-    >
-      Cancel
-    </button>
-  </div>
-</Modal>
+  >
+    <h2 style={{ fontSize: '18px', marginBottom: '15px' }}>Enter Quantity for {ingredientToSelect?.name}:</h2>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <input
+        type="number"
+        value={ingredientToSelect?.quantity || ''}
+        onChange={(e) => {
+          const quantity = e.target.value;
+          setIngredientToSelect({ ...ingredientToSelect, quantity });
+        }}
+        style={{
+          padding: '8px',
+          fontSize: '16px',
+          marginBottom: '15px',
+          width: '80%',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+        }}
+      />
+      <select
+        value={ingredientToSelect?.selectedUnit || 'g'}
+        onChange={(e) => {
+          const selectedUnit = e.target.value;
+          setIngredientToSelect({ ...ingredientToSelect, selectedUnit });
+        }}
+        style={{
+          padding: '8px',
+          fontSize: '16px',
+          marginBottom: '15px',
+          width: '80%',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+        }}
+      >
+        <option value="">Select Unit</option>
+        {ingredientUnits.map((unit, index) => (
+          <option key={index} value={unit}>{unit}</option>
+        ))}
+      </select>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'space-between', width: '80%' }}>
+      <button
+        onClick={() => handleAddIngredient(ingredientToSelect?.quantity)}
+        className="modal-button"
+        style={{
+          backgroundColor: '#28a745',
+          color: 'white',
+          borderRadius: '4px',
+          padding: '10px 20px',
+          border: 'none',
+          cursor: 'pointer',
+          outline: 'none',
+          fontWeight: 'bold',
+          fontSize: '16px',
+        }}
+      >
+        Add
+      </button>
+      <button
+        onClick={() => setIngredientToSelect(null)}
+        className="modal-button cancel-button"
+        style={{
+          backgroundColor: '#dc3545',
+          color: 'white',
+          borderRadius: '4px',
+          padding: '10px 20px',
+          border: 'none',
+          cursor: 'pointer',
+          outline: 'none',
+          fontWeight: 'bold',
+          fontSize: '16px',
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </Modal>
     </div>
   );
 }

@@ -7,6 +7,14 @@ import UserContext from '../UserContext';
 
 export default function Register() {
 
+    useEffect(() => {
+		document.body.style.backgroundImage = `url(/jay.jpg)`;
+		
+		return () => {
+		  document.body.style.backgroundImage = null;
+		};
+	  }, []);
+
     const {user} = useContext(UserContext);
 
     //an object with methods to redirect the user
