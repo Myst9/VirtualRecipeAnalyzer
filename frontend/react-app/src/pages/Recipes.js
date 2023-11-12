@@ -29,6 +29,7 @@ const nutrientCategories = {
     'Thiamin',
     'Riboflavin',
     'Niacin',
+    'Vitamin A, IU',
     'Vitamin B-6',
     'Vitamin B-12',
     'Vitamin B-12, added',
@@ -93,6 +94,7 @@ const nutrientCategories = {
     'Zinc, Zn',
     'Copper, Cu',
     'Selenium, Se',
+    'Manganese, Mn'
   ],
   Carbohydrates: [
     'Carbohydrate, by difference',
@@ -101,10 +103,30 @@ const nutrientCategories = {
     'Starch',
     'Net carbs',
   ],
-  'Proteins and Aminoacids': ['Protein'],
+  'Proteins and Aminoacids':
+    ['Protein',
+      'Tryptophan',
+      'Threonine',
+      'Isoleucine',
+      'Leucine',
+      'Lysine',
+      'Methionine',
+      'Cystine',
+      'Phenylalanine',
+      'Tyrosine',
+      'Valine',
+      'Arginine',
+      'Histidine',
+      'Alanine',
+      'Aspartic acid',
+      'Glutamic acid',
+      'Glycine',
+      'Proline',
+      'Serine'
+    ],
   Sterols: ['Cholesterol'],
   Other: ['Alcohol, ethyl', 'Water', 'Caffeine', 'Theobromine'],
-  Energy: [],
+  Energy: []
 };
 
 export default function Recipes() {
@@ -113,6 +135,7 @@ export default function Recipes() {
   const [nutritionalDetails, setNutritionalDetails] = useState(null);
   const [ingredients, setIngredients] = useState([]);
   const [ingredientUnits, setIngredientUnits] = useState([]);
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -337,6 +360,37 @@ export default function Recipes() {
     borderBottom: '1px solid #ddd',
   };
 
+  const calculateTotalWeight = (category) => {
+    if (nutritionalDetails) {
+      const totalWeight = categorizedNutrients[category].reduce(
+        (total, detail) => total + convertToMilligrams(detail.nutrientAmount, detail.nutrientUnit),
+        0
+      );
+      const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
+      return `${formattedTotalWeight} mg`;
+    }
+    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+  
+    // Function to convert various units to milligrams
+    function convertToMilligrams(amount, unit) {
+      const unitConversions = {
+        'g': 1e3,      
+        'mg': 1,       
+        'µg': 1e-3    
+      };
+  
+      return amount * unitConversions[unit] || 0;
+    }
+  };
+  
+  const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
+  const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
+  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalVitaminsWeight = calculateTotalWeight('Vitamins');
+  const totalMineralsWeight = calculateTotalWeight('Minerals');
+  const totalEnergy = calculateTotalWeight('Energy');
+  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalProteinWeight;
+
   return (
     <div className="recipe-container">
 
@@ -464,10 +518,66 @@ export default function Recipes() {
             </div>
           </div>
         </div>
+        
+        <div className="total-weight-section">
+          <h2>Total Nutritional Weights</h2>
+          <table className="table">
+            <thead>
+              <tr>
+                <th style={thStyle}>Category</th>
+                <th style={thStyle}>Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Protein Weight</td>
+                <td>{totalProteinWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Carbohydrate Weight</td>
+                <td>{totalCarbohydrateWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Fat Weight</td>
+                <td>{totalFatWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Vitamins Weight</td>
+                <td>{totalVitaminsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Minerals Weight</td>
+                <td>{totalMineralsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Energy</td>
+                <td>{totalEnergy} </td>
+              </tr>
+            </tbody>
+          </table>
+          <button
+            onClick={() => setShowAdditionalDetails(!showAdditionalDetails)}
+            style={{
+              backgroundColor: '#007bff',
+              color: 'white',
+              borderRadius: '4px',
+              padding: '10px 20px',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              fontWeight: 'bold',
+              fontSize: '16px',
+            }}
+          >
+            {showAdditionalDetails ? 'Hide Details' : 'View More'}
+          </button>
+          {/* <div className="pie-chart">
+            <Pie data={pieChartData} />
+          </div> */}
+        </div>
 
 
-
-        <div className="nutritional-details-section">
+        <div className="nutritional-details-section" style={{ color: 'white' }}>
           {isAnalyzing ? (
             <div className="loading-message">
               <Modal
@@ -487,8 +597,8 @@ export default function Recipes() {
                 <p>Analyzing Recipe...Scroll down for the nutritional analysis</p>
               </Modal>
             </div>
-          ) : (
-            <div style={{ color: 'white' }}>
+          ) : showAdditionalDetails ? (
+            <div className="additional-details" style={{ color: 'white' }}>
               <h2>Nutritional Details</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {Object.keys(categorizedNutrients).map((category) => (
@@ -518,7 +628,7 @@ export default function Recipes() {
                 ))}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 

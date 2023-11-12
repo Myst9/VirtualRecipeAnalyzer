@@ -61,7 +61,7 @@ const SimilarRecipes = () => {
 
   return (
     <Container className="mt-5">
-      <h2 className="text-center mb-5">Similar Recipes</h2>
+      <h2 className="text-center mb-5" style={{ color: 'white' }}>Similar Recipes</h2>
       {groupedPosts.map((row, rowIndex) => (
         <Row key={rowIndex} className="mb-3">
           {row.map(post => (

@@ -26,6 +26,52 @@ body::before {
   z-index: -1;
 }
 
+.profile-options {
+  position: absolute;
+  top: 60px; 
+  right: 0;
+  background-color: #fff;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  color: #000;
+  text-align: center;
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-icon-container {
+  position: relative;
+}
+
+.profile-options button {
+  margin-top: 5px;
+  cursor: pointer;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: block; /* Display buttons as blocks, placing each on a new line */
+  margin-bottom: 10px; 
+}
+
+
+
+/* Blue button for 'View Saved Posts' */
+.profile-options button.view-saved-posts {
+  background-color: #007bff; /* Blue color */
+  color: #fff; /* White text color */
+}
+
+/* Red button for 'Logout' */
+.profile-options button.logout {
+  background-color: #dc3545; /* Red color */
+  color: #fff; /* White text color */
+}
+
 .cardHighlight {
   min-height: 100%;
 }
