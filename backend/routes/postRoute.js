@@ -63,9 +63,14 @@ router.get("/all-posts", (req, res) => {
 		resultFromController));
 });
 
-router.put("/:postId/delete", auth.verify, (req, res) => {
+router.put("/:postId",(req, res) => {
+  postController.updatePost(req.params, req.body).then(resultFromController => res.send(
+    resultFromController));
+});
+
+router.post("/:postId", (req, res) => {
 	//data = auth.decode(req.headers.authorization);
-	postController.deletePost(data, req.params).then(resultFromController => res.send(
+	postController.deletePost(req.params).then(resultFromController => res.send(
 		resultFromController));
 });
 
