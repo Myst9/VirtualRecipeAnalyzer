@@ -5,6 +5,8 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 import nutrientCategories from '../utils/nutrientCategories';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShare, faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 
 export default function PostDetails() {
   const [post, setPost] = useState(null);
@@ -26,12 +28,12 @@ export default function PostDetails() {
   const [nutritionalAnalysis, setNutritionalAnalysis] = useState(null);
 
   useEffect(() => {
-		document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
-		
-		return () => {
-		  document.body.style.backgroundImage = null;
-		};
-	  }, []);
+    document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
+
+    return () => {
+      document.body.style.backgroundImage = null;
+    };
+  }, []);
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
@@ -119,6 +121,11 @@ export default function PostDetails() {
     }
   };
 
+  const shareViaWhatsApp = () => {
+    const message = `Check out this recipe ${post.title}\n${window.location.href}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
   const handleAnalyzeClick = () => {
     // Make a request to fetch nutritional analysis
     fetch(`${process.env.REACT_APP_API_URL}/recipes/analyze-recipe`, {
@@ -339,15 +346,28 @@ export default function PostDetails() {
               <Card className="cardHighlight p-0">
                 <Card.Body>
                   {imageUrl && (
-                    <div className="text-center">
+                    <div className="text-center" style={{ position: 'relative' }}>
                       <img
                         src={imageUrl}
                         alt="Post Image"
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
                         className="centered-image"
                       />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          bottom: '10px',
+                          left: '10px',  
+                          zIndex: 1,
+                          cursor: 'pointer',
+                        }}
+                        onClick={shareViaWhatsApp}
+                      >
+                        <FontAwesomeIcon icon={faShare} />
+                      </div>
                     </div>
                   )}
+
                   <h4 className="text-center mb-4">{post.title}</h4>
                   <Card.Subtitle>Posted by:</Card.Subtitle>
                   <Card.Text>{post.userId}</Card.Text>
