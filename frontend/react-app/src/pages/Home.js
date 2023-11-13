@@ -44,7 +44,7 @@ export default function Home() {
         const sortedPosts = data.sort((a, b) => b.likes - a.likes);
         
         // Take the first four posts
-        const firstFourPosts = sortedPosts.slice(0, 4);
+        const firstFourPosts = sortedPosts.slice(0, 3);
         setMostLikedPosts(firstFourPosts);
       });
   }, []);
@@ -66,7 +66,7 @@ export default function Home() {
       <Container>
         <Row className="mb-3">
           {mostLikedPosts.map(post => (
-            <Col key={post._id} lg={3}>
+            <Col key={post._id} lg={4}>
               <PostCard post={post} />
             </Col>
           ))}
