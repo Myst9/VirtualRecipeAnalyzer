@@ -141,7 +141,7 @@ module.exports.getSimilarRecipes = async (data) => {
       const union = new Set([...userIngredients, ...ingredientNames]);
       const similarity = intersection.length / union.size;
 
-      if (similarity >= 0.4) {
+      if (similarity >= 0.05) {
         const recipeId = recipe._id
         //console.log(recipeId);
         matchedRecipes.push({
