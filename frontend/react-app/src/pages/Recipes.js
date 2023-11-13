@@ -376,7 +376,7 @@ export default function Recipes() {
         .filter((detail) => nutrientName ? detail.nutrientName === nutrientName : true)
         .reduce((total, detail) => {
           // Check if nutrientAmount is a valid number
-          if (!isNaN(parseFloat(detail.nutrientAmount))) {
+          if (detail && !isNaN(parseFloat(detail.nutrientAmount)) && detail.nutrientUnit) {
             return total + parseFloat(detail.nutrientAmount);
           }
           return total;
