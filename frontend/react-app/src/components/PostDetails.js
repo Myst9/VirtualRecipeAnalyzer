@@ -360,7 +360,7 @@ export default function PostDetails() {
 
     if (confirmDelete) {
       // Make a DELETE request to delete the post
-      fetch(`http://localhost:4000/posts/${postId}`, {
+      fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
         method: 'POST',
       })
         .then(response => {

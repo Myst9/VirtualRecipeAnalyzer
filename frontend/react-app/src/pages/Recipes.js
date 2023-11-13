@@ -153,7 +153,7 @@ export default function Recipes() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:4000/recipes/get-images")
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/get-images`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -202,7 +202,7 @@ export default function Recipes() {
       selectedUnit: prevIngredient?.selectedUnit || defaultUnit,
     }));
   
-    fetch('http://localhost:4000/recipes/get-units', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/get-units`, {
       method: 'POST',
       body: JSON.stringify({ name: ingredient.name }),
       headers: {
@@ -269,7 +269,7 @@ export default function Recipes() {
       unit,
     }));
 
-    fetch('http://localhost:4000/recipes/analyze-recipe', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/analyze-recipe`, {
       method: 'POST',
       body: JSON.stringify({ ingredients: formattedIngredients }),
       headers: {
@@ -296,7 +296,7 @@ export default function Recipes() {
 
     const formattedIngredients = selectedIngredients.map(ingredient => ingredient.name);
 
-    fetch('http://localhost:4000/recipes/find-recipes', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/find-recipes`, {
       method: 'POST',
       body: JSON.stringify({ ingredients: formattedIngredients }),
       headers: {
@@ -370,15 +370,17 @@ export default function Recipes() {
     borderBottom: '1px solid #ddd',
   };
 
-  const calculateTotalWeight = (category) => {
+  const calculateTotalWeight = (category, nutrientName = null) => {
     if (nutritionalDetails) {
-      const totalWeight = categorizedNutrients[category].reduce((total, detail) => {
-        // Check if nutrientAmount is a valid number
-        if (!isNaN(parseFloat(detail.nutrientAmount))) {
-          return total + parseFloat(detail.nutrientAmount);
-        }
-        return total;
-      }, 0);
+      const totalWeight = categorizedNutrients[category]
+        .filter((detail) => nutrientName ? detail.nutrientName === nutrientName : true)
+        .reduce((total, detail) => {
+          // Check if nutrientAmount is a valid number
+          if (!isNaN(parseFloat(detail.nutrientAmount))) {
+            return total + parseFloat(detail.nutrientAmount);
+          }
+          return total;
+        }, 0);
   
       const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
       const unit = categorizedNutrients[category][0].nutrientUnit; // Use the unit from the first nutrient
@@ -386,11 +388,12 @@ export default function Recipes() {
       return `${formattedTotalWeight} ${unit}`;
     }
     return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
-  };  
+  };
+  
   
   const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
   const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
-  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalFatWeight = calculateTotalWeight('Fat', 'Total lipid (fat)');
   const totalVitaminsWeight = calculateTotalWeight('Vitamins');
   const totalMineralsWeight = calculateTotalWeight('Minerals');
   const totalEnergy = calculateTotalWeight('Energy');
