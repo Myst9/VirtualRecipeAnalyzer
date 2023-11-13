@@ -103,7 +103,7 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(241, 241, 241, 0.5); /* Adjust the alpha value for transparency */
+  background: rgba(241, 241, 241, 0.1); /* Adjust the alpha value for transparency */
 }
 
 ::-webkit-scrollbar-thumb {
