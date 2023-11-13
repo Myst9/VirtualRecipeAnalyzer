@@ -77,7 +77,7 @@ export default function PostCard({ post, isBookmarked }) {
       <Row>
         <Col lg={12}>
           {/* Use a div as the clickable area, excluding the bookmark button */}
-          <div className="rounded overflow-hidden shadow position-relative" onClick={() => window.location.href = postUrl}>
+          <div className="rounded overflow-hidden shadow position-relative" onClick={() => window.location.href = postUrl} style={{ cursor: 'pointer' }}>
             {imageUrl && (
               <div style={{ position: 'relative', paddingTop: '75%' }}>
                 <img
