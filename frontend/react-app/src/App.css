@@ -84,6 +84,11 @@ body::before {
   background-color: #132043;
 }
 
+.custom-navbar .nav-link.active {
+  background-color: #4779c4; 
+  border-radius: 4px; 
+}
+
 .arrow-link {
   text-decoration: none;
   display: inline-flex;
