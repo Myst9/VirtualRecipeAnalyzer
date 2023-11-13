@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { useNavigate } from 'react-router-dom';
+import nutrientCategories from '../utils/nutrientCategories';
 
 Modal.setAppElement('#root');
 
@@ -14,119 +15,6 @@ const modalStyles = {
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
-
-
-const nutrientCategories = {
-  Vitamins: [
-    'Vitamin A, RAE',
-    'Carotene, alpha',
-    'Carotene, beta',
-    'Cryptoxanthin, beta',
-    'Lutein + zeaxanthin',
-    'Lycopene',
-    'Retinol',
-    'Thiamin',
-    'Riboflavin',
-    'Niacin',
-    'Vitamin A, IU',
-    'Vitamin B-6',
-    'Vitamin B-12',
-    'Vitamin B-12, added',
-    'Folate, total',
-    'Folate, food',
-    'Folic acid',
-    'Vitamin C, total ascorbic acid',
-    'Vitamin D (D2 + D3)',
-    'Vitamin E (alpha-tocopherol)',
-    'Vitamin E, added',
-    'Tocopherol, alpha',
-    'Tocopherol, beta',
-    'Tocopherol, delta',
-    'Tocopherol, gamma',
-    'Tocotrienol, alpha',
-    'Tocotrienol, beta',
-    'Tocotrienol, delta',
-    'Tocotrienol, gamma',
-    'Vitamin K (phylloquinone)',
-    'Carotene, beta',
-    'Carotene, alpha',
-    'Cryptoxanthin, beta',
-    'Lycopene',
-    'Lutein + zeaxanthin',
-    'Choline, total',
-    'Folate, DFE',
-  ],
-  Fat: [
-    'Total lipid (fat)',
-    'Fatty acids, total saturated',
-    'SFA 4:0',
-    'SFA 6:0',
-    'SFA 8:0',
-    'SFA 10:0',
-    'SFA 12:0',
-    'SFA 14:0',
-    'SFA 16:0',
-    'SFA 18:0',
-    'Fatty acids, total monounsaturated',
-    'MUFA 16:1',
-    'MUFA 18:1',
-    'MUFA 20:1',
-    'MUFA 22:1',
-    'Fatty acids, total polyunsaturated',
-    'PUFA 18:2',
-    'PUFA 18:3',
-    'PUFA 20:4',
-    'PUFA 22:6 n-3 (DHA)',
-    'PUFA 18:4',
-    'PUFA 20:1',
-    'PUFA 20:5 n-3 (EPA)',
-    'PUFA 22:1',
-    'PUFA 22:5 n-3 (DPA)',
-  ],
-  Minerals: [
-    'Calcium, Ca',
-    'Iron, Fe',
-    'Magnesium, Mg',
-    'Phosphorus, P',
-    'Potassium, K',
-    'Sodium, Na',
-    'Zinc, Zn',
-    'Copper, Cu',
-    'Selenium, Se',
-    'Manganese, Mn'
-  ],
-  Carbohydrates: [
-    'Carbohydrate, by difference',
-    'Sugars, total including NLEA',
-    'Fiber, total dietary',
-    'Starch',
-    'Net carbs',
-  ],
-  'Proteins and Aminoacids':
-    ['Protein',
-      'Tryptophan',
-      'Threonine',
-      'Isoleucine',
-      'Leucine',
-      'Lysine',
-      'Methionine',
-      'Cystine',
-      'Phenylalanine',
-      'Tyrosine',
-      'Valine',
-      'Arginine',
-      'Histidine',
-      'Alanine',
-      'Aspartic acid',
-      'Glutamic acid',
-      'Glycine',
-      'Proline',
-      'Serine'
-    ],
-  Sterols: ['Cholesterol'],
-  Other: ['Alcohol, ethyl', 'Water', 'Caffeine', 'Theobromine'],
-  Energy: []
 };
 
 export default function Recipes() {
@@ -387,7 +275,7 @@ export default function Recipes() {
   
       return `${formattedTotalWeight} ${unit}`;
     }
-    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+    return '0.00'; // Return '0.00' if nutritionalDetails is not available
   };
   
   
