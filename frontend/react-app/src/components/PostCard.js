@@ -13,7 +13,7 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
 
   const [bookmarkStatus, setBookmarkStatus] = useState(false); // Initialize as false by default
   const [likeStatus, setLikeStatus] = useState(false); 
-  const [likeCount, setLikeCount] = useState(post.likes[0] ? post.likes[0].count : 0);
+  const [likeCount, setLikeCount] = useState(post.likes);
 
 
   // State for showing the notification
@@ -130,9 +130,13 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
       if (data) {
         // Update state with the new like status
         setLikeStatus(!likeStatus);
-        setLikeCount(data.likes.length);
+      
+        // Adjust the like count based on the current like status
+        setLikeCount(prevLikeCount => (likeStatus ? prevLikeCount - 1 : prevLikeCount + 1));
+      
         setShowNotification(true);
       }
+      
     } catch (error) {
       console.error('Like request failed:', error);
     }
@@ -150,7 +154,6 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
     <Container>
       <Row>
         <Col lg={12}>
-          {/* Use a div as the clickable area, excluding the bookmark button */}
           <div
             className="rounded overflow-hidden shadow position-relative"
             onClick={() => (window.location.href = postUrl)}
@@ -172,52 +175,56 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
               </div>
             )}
             <Card className="cardHighlight p-0 border-0">
-              <Card.Body style={{ height: '100px' }}>
-                {/* Set a fixed height for the card body */}
-                <div className="position-absolute top-0 end-0 p-2">
-                <Button
-                    variant="outline-danger"
-                    onClick={handleLikeClick}
-                    style={{
-                      border: 'none',
-                      boxShadow: 'none',
-                      backgroundColor: 'transparent',
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={likeStatus ? solidHeart : regularHeart}
-                      style={{ color: 'red' }}
-                    />
-                    <span className="ms-1"  style={{ color: 'black'}}>{likeCount}</span>
-                  </Button>
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <Button
+                      variant="outline-danger"
+                      onClick={handleLikeClick}
+                      style={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent',
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={likeStatus ? solidHeart : regularHeart}
+                        style={{ color: 'red' }}
+                      />
+                      <span className="ms-1" style={{ color: 'black' }}>{likeCount}</span>
+                    </Button>
+                  </div>
 
-                  {/* Bookmark button */}
-                  <Button
-                    variant="outline-primary"
-                    onClick={handleBookmarkClick}
-                    style={{
-                      border: 'none', // Remove border
-                      boxShadow: 'none', // Remove box shadow
-                      backgroundColor: 'transparent', // Remove background color
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={bookmarkStatus ? solidBookmark : regularBookmark}
-                      style={{ color: 'black' }}
-                    />
-                  </Button>
-                  {/* Share button */}
-                  <Button
-                    variant="outline-primary"
-                    onClick={sharePost}
-                    style={{
-                      border: 'none', // Remove border
-                      boxShadow: 'none', // Remove box shadow
-                      backgroundColor: 'transparent', // Remove background color
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
-                  </Button>
+                  <div>
+                    <Button
+                      variant="outline-primary"
+                      onClick={handleBookmarkClick}
+                      style={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent',
+                      }}
+                    >
+                      <FontAwesomeIcon
+                        icon={bookmarkStatus ? solidBookmark : regularBookmark}
+                        style={{ color: 'black' }}
+                      />
+                    </Button>
+                  </div>
+
+                  <div>
+                    <Button
+                      variant="outline-primary"
+                      onClick={sharePost}
+                      style={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent',
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
+                    </Button>
+                  </div>
                 </div>
                 <Card.Title>
                   <h4 className="text-center">{title}</h4>
@@ -229,20 +236,6 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
           </div>
         </Col>
       </Row>
-      {/* Notification Toast */}
-      <Toast
-        show={showNotification}
-        onClose={() => setShowNotification(false)}
-        delay={3000}
-        autohide
-        style={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-        }}
-      >
-        {/* <Toast.Body>{bookmarkStatus ? 'Recipe saved!' : 'Recipe removed!'}</Toast.Body> */}
-      </Toast>
     </Container>
   );
 }

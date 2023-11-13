@@ -149,7 +149,18 @@ module.exports.likePost = async (data) => {
 	  }
   
 	  result.password = '';
-	  return result;
+
+	  const post = await Post.findById(postId);
+	  if(!post) {
+		return false;
+	  }
+	  if(remove){
+		post.likes -= 1;
+	  } else {
+		post.likes += 1;
+	  }
+	  await post.save();
+	  return true;
 	} catch (error) {
 	  console.error('Like post error:', error);
 	  throw error;
@@ -167,7 +178,14 @@ module.exports.likePost = async (data) => {
 	  }
   
 	  result.password = '';
-	  return result;
+	  const post = await Post.findById(postId);
+	  if(!post) {
+		return false;
+	  }
+	  post.likes -= 1;
+
+	  await post.save();
+	  return true;
 	} catch (error) {
 	  console.error('Remove liked post error:', error);
 	  throw error;

@@ -34,6 +34,21 @@ export default function Home() {
       });
   }, []);
 
+  const [mostLikedPosts, setMostLikedPosts] = useState([]);
+
+  useEffect(() => {
+    fetch(`${process.env.REACT_APP_API_URL}/posts/all-posts`)
+      .then(res => res.json())
+      .then(data => {
+        // Sort the posts based on the number of likes in descending order
+        const sortedPosts = data.sort((a, b) => b.likes - a.likes);
+        
+        // Take the first four posts
+        const firstFourPosts = sortedPosts.slice(0, 4);
+        setMostLikedPosts(firstFourPosts);
+      });
+  }, []);
+
   return (
     <div className="pageContainer mt-5">
       <Banner data={data} />
@@ -50,8 +65,8 @@ export default function Home() {
 
       <Container>
         <Row className="mb-3">
-          {limitedPosts.map(post => (
-            <Col key={post._id} lg={4}>
+          {mostLikedPosts.map(post => (
+            <Col key={post._id} lg={3}>
               <PostCard post={post} />
             </Col>
           ))}
