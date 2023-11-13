@@ -5,13 +5,13 @@ import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
 import { faShare } from '@fortawesome/free-solid-svg-icons';
 
-export default function PostCard({ post, isBookmarked }) {
+export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
   const { userId, title, _id } = post;
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${_id}`;
   const postUrl = `/posts/${_id}`;
 
-  const [bookmarkStatus, setBookmarkStatus] = useState(false); // Initialize as false by default
+  const [bookmarkStatus, setBookmarkStatus] = useState(isBookmarked);
 
   // State for showing the notification
   const [showNotification, setShowNotification] = useState(false);
@@ -27,11 +27,10 @@ export default function PostCard({ post, isBookmarked }) {
           },
         });
 
-        const savedPosts = await response.json();
-        console.log('Saved Posts:', savedPosts); // Log the saved posts to the console
-
-        // Check if the current post is in the savedPosts list
-        const isPostSaved = savedPosts.some((savedPost) => savedPost._id === _id);
+      const savedPosts = await response.json();
+      
+      // Check if the current post is in the savedPosts list
+      const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
 
         // Update state with the new bookmark status
         setBookmarkStatus(isPostSaved);
@@ -66,6 +65,11 @@ export default function PostCard({ post, isBookmarked }) {
         // Update state with the new bookmark status
         setBookmarkStatus(!bookmarkStatus);
         setShowNotification(true);
+
+        // Call the onBookmarkClick callback to remove the post from the saved posts page
+        if (onBookmarkClick) {
+          onBookmarkClick(_id);
+        }
       }
     } catch (error) {
       console.error('Bookmark request failed:', error);

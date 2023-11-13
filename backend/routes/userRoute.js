@@ -58,7 +58,7 @@ router.get('/getSavedPosts', auth.verify, async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
+    
     res.json(user.savedPosts);
   } catch (error) {
     console.error('Error fetching saved posts:', error);
