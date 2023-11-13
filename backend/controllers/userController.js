@@ -2,7 +2,7 @@ const User = require("../models/User");
 const Course = require("../models/Recipe");
 const bcrypt = require("bcrypt");
 const auth = require("../auth");
-
+const Post = require("../models/Post");
 module.exports.checkEmailExists = (reqBody) => {
 	
 	return User.find({ email: reqBody.email }).then(result => {
@@ -134,3 +134,42 @@ module.exports.removeSavedPost = async (data) => {
     throw error;
   }
 };
+
+module.exports.likePost = async (data) => {
+	try {
+	  const { userId, postId, remove } = data;
+  
+	  const updateOperation = remove ? '$pull' : '$addToSet';
+	  const updateQuery = { [updateOperation]: { likes: postId } };
+  
+	  const result = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
+  
+	  if (!result) {
+		return false; // User not found or other error
+	  }
+  
+	  result.password = '';
+	  return result;
+	} catch (error) {
+	  console.error('Like post error:', error);
+	  throw error;
+	}
+  };
+  
+  module.exports.removeLikedPost = async (data) => {
+	try {
+	  const { userId, postId } = data;
+  
+	  const result = await User.findByIdAndUpdate(userId, { $pull: { likes: postId } }, { new: true });
+  
+	  if (!result) {
+		return false; // User not found or other error
+	  }
+  
+	  result.password = '';
+	  return result;
+	} catch (error) {
+	  console.error('Remove liked post error:', error);
+	  throw error;
+	}
+  };

@@ -41,21 +41,7 @@ const postSchema = new mongoose.Schema({
 	    type: Number,
 	    default: 0 // Initial like count
     },
-    dislikes: {
-        type: Number,
-	    default: 0 // Initial dislike count
-	}
 });
 
-// Custom methods to handle likes and dislikes
-/*postSchema.methods.like = function () {
-  this.likes += 1;
-  return this.save();
-};
-
-postSchema.methods.dislike = function () {
-  this.dislikes += 1;
-  return this.save();
-};*/
 
 module.exports = mongoose.model("Post", postSchema);

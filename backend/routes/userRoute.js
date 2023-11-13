@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const auth = require("../auth");
 const User = require('../models/User');
+const Post = require("../models/Post");
 // Routes for checking if the email already exists in the database
 router.post("/checkEmail", (req,res) => {
 	userController.checkEmailExists(req.body).then(resultFromController => res.send(resultFromController));
@@ -66,5 +67,41 @@ router.get('/getSavedPosts', auth.verify, async (req, res) => {
   }
 });
 
+// Route for liking a post
+router.post('/like', auth.verify, (req, res) => {
+  const userData = auth.decode(req.headers.authorization);
+  const data = {
+    userId: userData.id,
+    postId: req.body.postId,
+  };
+  userController.likePost(data).then((resultFromController) => res.send(resultFromController));
+});
+
+// Route for removing a liked post
+router.post('/removeLikedPost', auth.verify, (req, res) => {
+  const userData = auth.decode(req.headers.authorization);
+  const data = {
+    userId: userData.id,
+    postId: req.body.postId,
+  };
+  userController.removeLikedPost(data).then((resultFromController) => res.send(resultFromController));
+});
+
+// Route for getting liked posts
+router.get('/getLikedPosts', auth.verify, async (req, res) => {
+  try {
+    const userData = auth.decode(req.headers.authorization);
+    const user = await User.findById(userData.id).populate('likes');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json(user.likes);
+  } catch (error) {
+    console.error('Error fetching liked posts:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 module.exports = router;
