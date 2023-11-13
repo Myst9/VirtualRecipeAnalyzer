@@ -372,26 +372,21 @@ export default function Recipes() {
 
   const calculateTotalWeight = (category) => {
     if (nutritionalDetails) {
-      const totalWeight = categorizedNutrients[category].reduce(
-        (total, detail) => total + convertToMilligrams(detail.nutrientAmount, detail.nutrientUnit),
-        0
-      );
+      const totalWeight = categorizedNutrients[category].reduce((total, detail) => {
+        // Check if nutrientAmount is a valid number
+        if (!isNaN(parseFloat(detail.nutrientAmount))) {
+          return total + parseFloat(detail.nutrientAmount);
+        }
+        return total;
+      }, 0);
+  
       const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
-      return `${formattedTotalWeight} mg`;
+      const unit = categorizedNutrients[category][0].nutrientUnit; // Use the unit from the first nutrient
+  
+      return `${formattedTotalWeight} ${unit}`;
     }
     return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
-  
-    // Function to convert various units to milligrams
-    function convertToMilligrams(amount, unit) {
-      const unitConversions = {
-        'g': 1e3,      
-        'mg': 1,       
-        'µg': 1e-3    
-      };
-  
-      return amount * unitConversions[unit] || 0;
-    }
-  };
+  };  
   
   const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
   const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
@@ -531,35 +526,35 @@ export default function Recipes() {
         </div>
         
         <div className="total-weight-section" style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-          <h2>Total Nutritional Weights</h2>
+          <h2>Nutritional Analysis</h2>
           <table className="table">
             <thead>
               <tr>
                 <th style={thStyle}>Category</th>
-                <th style={thStyle}>Weight</th>
+                <th style={thStyle}>Amount</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Total Protein Weight</td>
+                <td>Total Protein</td>
                 <td>{totalProteinWeight} </td>
               </tr>
               <tr>
-                <td>Total Carbohydrate Weight</td>
+                <td>Total Carbohydrate</td>
                 <td>{totalCarbohydrateWeight} </td>
               </tr>
               <tr>
-                <td>Total Fat Weight</td>
+                <td>Total Fat</td>
                 <td>{totalFatWeight} </td>
               </tr>
-              <tr>
+              {/* <tr>
                 <td>Total Vitamins Weight</td>
                 <td>{totalVitaminsWeight} </td>
               </tr>
               <tr>
                 <td>Total Minerals Weight</td>
                 <td>{totalMineralsWeight} </td>
-              </tr>
+              </tr> */}
               <tr>
                 <td>Total Energy</td>
                 <td>{totalEnergy} </td>

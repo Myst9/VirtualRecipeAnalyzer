@@ -40,8 +40,13 @@ export default function AppNavbar() {
 
   return (
     <Navbar expand="lg" className="custom-navbar fixed-top">
-      <Navbar.Brand as={Link} to="/" className="mx-5" style={{ color: '#fff' }}>
+      {/* <Navbar.Brand as={Link} to="/" className="mx-5" style={{ color: '#fff' }}>
         Virtual Recipe Analyzer
+      </Navbar.Brand> */}
+
+<Navbar.Brand as={Link} to="/" className="mx-5" style={{ color: '#fff' }}>
+        {/* Replace "Virtual Recipe Analyzer" with an image */}
+        <img src="/cooking.png" alt="Icon" width="30" height="30" />
       </Navbar.Brand>
 
       <Navbar.Toggle aria-controls="basic-navbar-nav" className="custom-toggler" />
