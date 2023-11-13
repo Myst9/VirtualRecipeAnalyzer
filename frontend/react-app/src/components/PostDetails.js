@@ -5,6 +5,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 import nutrientCategories from '../utils/nutrientCategories';
+import CommentForm from './CommentForm';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShare, faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 
@@ -26,6 +27,7 @@ export default function PostDetails() {
   const [unit, setUnit] = useState('');
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [nutritionalAnalysis, setNutritionalAnalysis] = useState(null);
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
     document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
@@ -34,6 +36,24 @@ export default function PostDetails() {
       document.body.style.backgroundImage = null;
     };
   }, []);
+
+  useEffect(() => {
+    // Fetch comments for the current post
+    fetch(`${process.env.REACT_APP_API_URL}/comments/${postId}`, {
+      method: 'GET',
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((commentsData) => {
+        setComments(commentsData);
+        console.log(commentsData);
+      })
+      .catch((error) => console.error('Error fetching comments:', error));
+  }, [postId]);
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
@@ -416,13 +436,13 @@ export default function PostDetails() {
                                   <td>{totalFatWeight} </td>
                                 </tr>
                                 {/* <tr>
-                <td>Total Vitamins Weight</td>
-                <td>{totalVitaminsWeight} </td>
-              </tr>
-              <tr>
-                <td>Total Minerals Weight</td>
-                <td>{totalMineralsWeight} </td>
-              </tr> */}
+              <td>Total Vitamins Weight</td>
+              <td>{totalVitaminsWeight} </td>
+            </tr>
+            <tr>
+              <td>Total Minerals Weight</td>
+              <td>{totalMineralsWeight} </td>
+            </tr> */}
                                 <tr>
                                   <td>Total Energy</td>
                                   <td>{totalEnergy} </td>
@@ -566,6 +586,36 @@ export default function PostDetails() {
             ) : (
               <p>Loading post details...</p>
             )}
+          </Col>
+          <Col lg={{ span: 6, offset: 3 }}>
+            <Card.Subtitle className="mt-4 text-white" style={{ fontSize: '1.5rem' }}>Comments:</Card.Subtitle>
+
+            {/* Render your comment form component here */}
+            <CommentForm postId={postId} user={user} setComments={setComments} />
+
+            {/* Display comments */}
+            <ul className="list-unstyled">
+              {comments.map((comment) => (
+                <li key={comment._id} className="mb-3">
+                  <div
+                    className="comment-container"
+                    style={{
+                      backgroundColor: 'white',
+                      padding: '10px',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <div className="d-flex align-items-center mb-2">
+                      <span style={{ fontWeight: 'bold' }}>{comment.userId}</span>
+                    </div>
+                    <div className="comment-text">
+                      {comment.text}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </Col>
         </Row>
       </Container>

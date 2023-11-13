@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const userRoutes = require("./routes/userRoute.js");
 const recipeRoutes = require("./routes/recipeRoute.js");
 const postRoutes = require("./routes/postRoute.js");
+const commentRoutes = require("./routes/commentRoute.js");
 
 const cors = require("cors");
 
@@ -33,3 +34,4 @@ app.listen(process.env.PORT || 4000, () => {
 app.use("/users", userRoutes);
 app.use("/recipes", recipeRoutes);
 app.use("/posts", postRoutes);
+app.use("/comments", commentRoutes);

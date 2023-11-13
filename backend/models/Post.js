@@ -44,7 +44,13 @@ const postSchema = new mongoose.Schema({
     dislikes: {
         type: Number,
 	    default: 0 // Initial dislike count
-	}
+	},
+	comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment',
+    },
+  ],
 });
 
 // Custom methods to handle likes and dislikes
