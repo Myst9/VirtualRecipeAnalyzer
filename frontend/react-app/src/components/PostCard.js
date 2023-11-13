@@ -3,6 +3,7 @@ import { Card, Col, Row, Container, Button, Toast } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark as solidBookmark } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark } from '@fortawesome/free-regular-svg-icons';
+import { faShare } from '@fortawesome/free-solid-svg-icons';
 
 export default function PostCard({ post, isBookmarked }) {
   const { userId, title, _id } = post;
@@ -16,32 +17,31 @@ export default function PostCard({ post, isBookmarked }) {
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
-  const fetchSavedPosts = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/users/getSavedPosts`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
+    const fetchSavedPosts = async () => {
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/users/getSavedPosts`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
-      const savedPosts = await response.json();
-      console.log('Saved Posts:', savedPosts); // Log the saved posts to the console
+        const savedPosts = await response.json();
+        console.log('Saved Posts:', savedPosts); // Log the saved posts to the console
 
-      // Check if the current post is in the savedPosts list
-      const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
+        // Check if the current post is in the savedPosts list
+        const isPostSaved = savedPosts.some((savedPost) => savedPost._id === _id);
 
-      // Update state with the new bookmark status
-      setBookmarkStatus(isPostSaved);
-    } catch (error) {
-      console.error('Error fetching saved posts:', error);
-    }
-  };
+        // Update state with the new bookmark status
+        setBookmarkStatus(isPostSaved);
+      } catch (error) {
+        console.error('Error fetching saved posts:', error);
+      }
+    };
 
-  fetchSavedPosts();
-}, [userId, _id]);
-
+    fetchSavedPosts();
+  }, [userId, _id]);
 
   const handleBookmarkClick = async (event) => {
     event.stopPropagation();
@@ -72,12 +72,23 @@ export default function PostCard({ post, isBookmarked }) {
     }
   };
 
+  const sharePost = (event) => {
+    event.stopPropagation();
+    const message = `Check out this recipe ${post.title}\n${window.location.href}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <Container>
       <Row>
         <Col lg={12}>
           {/* Use a div as the clickable area, excluding the bookmark button */}
-          <div className="rounded overflow-hidden shadow position-relative" onClick={() => window.location.href = postUrl} style={{ cursor: 'pointer' }}>
+          <div
+            className="rounded overflow-hidden shadow position-relative"
+            onClick={() => (window.location.href = postUrl)}
+            style={{ cursor: 'pointer' }}
+          >
             {imageUrl && (
               <div style={{ position: 'relative', paddingTop: '75%' }}>
                 <img
@@ -111,6 +122,18 @@ export default function PostCard({ post, isBookmarked }) {
                       icon={bookmarkStatus ? solidBookmark : regularBookmark}
                       style={{ color: 'black' }}
                     />
+                  </Button>
+                  {/* Share button */}
+                  <Button
+                    variant="outline-primary"
+                    onClick={sharePost}
+                    style={{
+                      border: 'none', // Remove border
+                      boxShadow: 'none', // Remove box shadow
+                      backgroundColor: 'transparent', // Remove background color
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
                   </Button>
                 </div>
                 <Card.Title>

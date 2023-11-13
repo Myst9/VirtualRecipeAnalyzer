@@ -353,20 +353,22 @@ export default function PostDetails() {
                         style={{ maxWidth: '100%', maxHeight: '100%' }}
                         className="centered-image"
                       />
-                      <div
-                        style={{
-                          position: 'absolute',
-                          bottom: '10px',
-                          left: '10px',  
-                          zIndex: 1,
-                          cursor: 'pointer',
-                        }}
-                        onClick={shareViaWhatsApp}
-                      >
-                        <FontAwesomeIcon icon={faShare} />
-                      </div>
                     </div>
                   )}
+
+                  <div
+                    style={{
+                      position: 'absolute',
+                      // top: '10px',
+                      right: '20px',
+                      zIndex: 1,
+                      padding: '10px',
+                      cursor: 'pointer',
+                    }}
+                    onClick={shareViaWhatsApp}
+                  >
+                    <FontAwesomeIcon icon={faShare} />
+                  </div>
 
                   <h4 className="text-center mb-4">{post.title}</h4>
                   <Card.Subtitle>Posted by:</Card.Subtitle>
@@ -384,13 +386,6 @@ export default function PostDetails() {
                       <li>No ingredients available</li>
                     )}
                   </ul>
-
-                  {/* Analyze button */}
-                  <div className="text-center">
-                    <Button variant="info" onClick={handleAnalyzeClick}>
-                      Analyze
-                    </Button>
-                  </div>
 
                   {showAnalysisModal && (
                     <Modal show={showAnalysisModal} onHide={() => setShowAnalysisModal(false)}>
@@ -449,7 +444,7 @@ export default function PostDetails() {
                   {/* Edit and Delete buttons */}
                   {isCurrentUserPost && (
                     <div className="text-center">
-                      <Button variant="primary" onClick={handleEditClick}>
+                      <Button variant="info" onClick={handleEditClick}>
                         Edit
                       </Button>{' '}
                       <Button variant="danger" onClick={handleDeleteClick}>
@@ -528,9 +523,14 @@ export default function PostDetails() {
                     </Modal>
                   )}
 
-                  <Button variant="primary" onClick={handleBackClick}>
-                    Back
-                  </Button>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Button variant="primary" onClick={handleBackClick}>
+                      Back
+                    </Button>
+                    <Button variant="info" onClick={handleAnalyzeClick}>
+                      Analyze
+                    </Button>
+                  </div>
                 </Card.Body>
 
                 {showQuantityModal && (
