@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
+import nutrientCategories from '../utils/nutrientCategories';
 
 export default function PostDetails() {
   const [post, setPost] = useState(null);
@@ -21,6 +22,16 @@ export default function PostDetails() {
   const [quantityInput, setQuantityInput] = useState('');
   const [unitsOptions, setUnitsOptions] = useState([]);
   const [unit, setUnit] = useState('');
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [nutritionalAnalysis, setNutritionalAnalysis] = useState(null);
+
+  useEffect(() => {
+		document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
+		
+		return () => {
+		  document.body.style.backgroundImage = null;
+		};
+	  }, []);
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
@@ -106,6 +117,29 @@ export default function PostDetails() {
         console.error('Error fetching units:', error);
       }
     }
+  };
+
+  const handleAnalyzeClick = () => {
+    // Make a request to fetch nutritional analysis
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/analyze-recipe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        ingredients: selectedIngredients,
+      }),
+    })
+      .then((response) => response.json())
+      .then((analysisData) => {
+        setNutritionalAnalysis(analysisData);
+        setShowAnalysisModal(true);
+        console.log(analysisData);
+      })
+      .catch((error) => {
+        console.error('Error fetching nutritional analysis:', error);
+      });
   };
 
   const handleIngredientSelect = (selectedOption) => {
@@ -223,7 +257,7 @@ export default function PostDetails() {
 
     if (confirmDelete) {
       // Make a DELETE request to delete the post
-      fetch(`http://localhost:4000/posts/${postId}`, {
+      fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`, {
         method: 'POST',
       })
         .then(response => {
@@ -240,6 +274,61 @@ export default function PostDetails() {
         .catch(error => console.error('Error deleting post:', error));
     }
   };
+
+  const categorizeNutrients = (nutrients) => {
+    const categorizedNutrients = {};
+
+    // Initialize categories
+    for (const category in nutrientCategories) {
+      categorizedNutrients[category] = [];
+    }
+
+    // Categorize nutrients
+    for (const nutrient of nutrients) {
+      let categoryFound = false;
+
+      for (const category in nutrientCategories) {
+        if (nutrientCategories[category].includes(nutrient.nutrientName)) {
+          categorizedNutrients[category].push(nutrient);
+          categoryFound = true;
+          break;
+        }
+      }
+
+      if (!categoryFound) {
+        categorizedNutrients['Energy'].push(nutrient);
+      }
+    }
+
+    return categorizedNutrients;
+  };
+
+  const categorizedNutrients = categorizeNutrients(nutritionalAnalysis || []);
+
+  const calculateTotalWeight = (category) => {
+    if (nutritionalAnalysis) {
+      const totalWeight = categorizedNutrients[category].reduce((total, detail) => {
+        // Check if nutrientAmount is a valid number
+        if (!isNaN(parseFloat(detail.nutrientAmount))) {
+          return total + parseFloat(detail.nutrientAmount);
+        }
+        return total;
+      }, 0);
+
+      const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
+      const unit = categorizedNutrients[category][0].nutrientUnit; // Use the unit from the first nutrient
+
+      return `${formattedTotalWeight} ${unit}`;
+    }
+    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+  };
+
+  const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
+  const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
+  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalVitaminsWeight = calculateTotalWeight('Vitamins');
+  const totalMineralsWeight = calculateTotalWeight('Minerals');
+  const totalEnergy = calculateTotalWeight('Energy');
 
   return (
     <div className='mt-5'>
@@ -275,6 +364,64 @@ export default function PostDetails() {
                       <li>No ingredients available</li>
                     )}
                   </ul>
+
+                  {/* Analyze button */}
+                  <div className="text-center">
+                    <Button variant="info" onClick={handleAnalyzeClick}>
+                      Analyze
+                    </Button>
+                  </div>
+
+                  {showAnalysisModal && (
+                    <Modal show={showAnalysisModal} onHide={() => setShowAnalysisModal(false)}>
+                      <Modal.Header closeButton>
+                        <Modal.Title>Nutritional Analysis</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        {nutritionalAnalysis ? (
+                          <div>
+                            <table className="table">
+                              <thead>
+                                <tr>
+                                  <th>Category</th>
+                                  <th>Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Total Protein</td>
+                                  <td>{totalProteinWeight} </td>
+                                </tr>
+                                <tr>
+                                  <td>Total Carbohydrate</td>
+                                  <td>{totalCarbohydrateWeight} </td>
+                                </tr>
+                                <tr>
+                                  <td>Total Fat</td>
+                                  <td>{totalFatWeight} </td>
+                                </tr>
+                                {/* <tr>
+                <td>Total Vitamins Weight</td>
+                <td>{totalVitaminsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Minerals Weight</td>
+                <td>{totalMineralsWeight} </td>
+              </tr> */}
+                                <tr>
+                                  <td>Total Energy</td>
+                                  <td>{totalEnergy} </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p>Loading nutritional analysis...</p>
+                        )}
+                      </Modal.Body>
+                    </Modal>
+                  )}
+
 
                   <Card.Subtitle>Description:</Card.Subtitle>
                   <Card.Text>{post.description}</Card.Text>

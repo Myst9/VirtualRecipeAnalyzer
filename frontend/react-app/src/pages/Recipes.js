@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import { useNavigate } from 'react-router-dom';
+import nutrientCategories from '../utils/nutrientCategories';
 
 Modal.setAppElement('#root');
 
@@ -14,119 +15,6 @@ const modalStyles = {
     justifyContent: 'center',
     alignItems: 'center',
   },
-};
-
-
-const nutrientCategories = {
-  Vitamins: [
-    'Vitamin A, RAE',
-    'Carotene, alpha',
-    'Carotene, beta',
-    'Cryptoxanthin, beta',
-    'Lutein + zeaxanthin',
-    'Lycopene',
-    'Retinol',
-    'Thiamin',
-    'Riboflavin',
-    'Niacin',
-    'Vitamin A, IU',
-    'Vitamin B-6',
-    'Vitamin B-12',
-    'Vitamin B-12, added',
-    'Folate, total',
-    'Folate, food',
-    'Folic acid',
-    'Vitamin C, total ascorbic acid',
-    'Vitamin D (D2 + D3)',
-    'Vitamin E (alpha-tocopherol)',
-    'Vitamin E, added',
-    'Tocopherol, alpha',
-    'Tocopherol, beta',
-    'Tocopherol, delta',
-    'Tocopherol, gamma',
-    'Tocotrienol, alpha',
-    'Tocotrienol, beta',
-    'Tocotrienol, delta',
-    'Tocotrienol, gamma',
-    'Vitamin K (phylloquinone)',
-    'Carotene, beta',
-    'Carotene, alpha',
-    'Cryptoxanthin, beta',
-    'Lycopene',
-    'Lutein + zeaxanthin',
-    'Choline, total',
-    'Folate, DFE',
-  ],
-  Fat: [
-    'Total lipid (fat)',
-    'Fatty acids, total saturated',
-    'SFA 4:0',
-    'SFA 6:0',
-    'SFA 8:0',
-    'SFA 10:0',
-    'SFA 12:0',
-    'SFA 14:0',
-    'SFA 16:0',
-    'SFA 18:0',
-    'Fatty acids, total monounsaturated',
-    'MUFA 16:1',
-    'MUFA 18:1',
-    'MUFA 20:1',
-    'MUFA 22:1',
-    'Fatty acids, total polyunsaturated',
-    'PUFA 18:2',
-    'PUFA 18:3',
-    'PUFA 20:4',
-    'PUFA 22:6 n-3 (DHA)',
-    'PUFA 18:4',
-    'PUFA 20:1',
-    'PUFA 20:5 n-3 (EPA)',
-    'PUFA 22:1',
-    'PUFA 22:5 n-3 (DPA)',
-  ],
-  Minerals: [
-    'Calcium, Ca',
-    'Iron, Fe',
-    'Magnesium, Mg',
-    'Phosphorus, P',
-    'Potassium, K',
-    'Sodium, Na',
-    'Zinc, Zn',
-    'Copper, Cu',
-    'Selenium, Se',
-    'Manganese, Mn'
-  ],
-  Carbohydrates: [
-    'Carbohydrate, by difference',
-    'Sugars, total including NLEA',
-    'Fiber, total dietary',
-    'Starch',
-    'Net carbs',
-  ],
-  'Proteins and Aminoacids':
-    ['Protein',
-      'Tryptophan',
-      'Threonine',
-      'Isoleucine',
-      'Leucine',
-      'Lysine',
-      'Methionine',
-      'Cystine',
-      'Phenylalanine',
-      'Tyrosine',
-      'Valine',
-      'Arginine',
-      'Histidine',
-      'Alanine',
-      'Aspartic acid',
-      'Glutamic acid',
-      'Glycine',
-      'Proline',
-      'Serine'
-    ],
-  Sterols: ['Cholesterol'],
-  Other: ['Alcohol, ethyl', 'Water', 'Caffeine', 'Theobromine'],
-  Energy: []
 };
 
 export default function Recipes() {
@@ -153,7 +41,7 @@ export default function Recipes() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:4000/recipes/get-images")
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/get-images`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -202,7 +90,7 @@ export default function Recipes() {
       selectedUnit: prevIngredient?.selectedUnit || defaultUnit,
     }));
   
-    fetch('http://localhost:4000/recipes/get-units', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/get-units`, {
       method: 'POST',
       body: JSON.stringify({ name: ingredient.name }),
       headers: {
@@ -269,7 +157,7 @@ export default function Recipes() {
       unit,
     }));
 
-    fetch('http://localhost:4000/recipes/analyze-recipe', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/analyze-recipe`, {
       method: 'POST',
       body: JSON.stringify({ ingredients: formattedIngredients }),
       headers: {
@@ -296,7 +184,7 @@ export default function Recipes() {
 
     const formattedIngredients = selectedIngredients.map(ingredient => ingredient.name);
 
-    fetch('http://localhost:4000/recipes/find-recipes', {
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/find-recipes`, {
       method: 'POST',
       body: JSON.stringify({ ingredients: formattedIngredients }),
       headers: {
@@ -370,36 +258,34 @@ export default function Recipes() {
     borderBottom: '1px solid #ddd',
   };
 
-  const calculateTotalWeight = (category) => {
+  const calculateTotalWeight = (category, nutrientName = null) => {
     if (nutritionalDetails) {
-      const totalWeight = categorizedNutrients[category].reduce(
-        (total, detail) => total + convertToMilligrams(detail.nutrientAmount, detail.nutrientUnit),
-        0
-      );
+      const totalWeight = categorizedNutrients[category]
+        .filter((detail) => nutrientName ? detail.nutrientName === nutrientName : true)
+        .reduce((total, detail) => {
+          // Check if nutrientAmount is a valid number
+          if (detail && !isNaN(parseFloat(detail.nutrientAmount)) && detail.nutrientUnit) {
+            return total + parseFloat(detail.nutrientAmount);
+          }
+          return total;
+        }, 0);
+  
       const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
-      return `${formattedTotalWeight} mg`;
-    }
-    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+      const unit = categorizedNutrients[category][0].nutrientUnit; // Use the unit from the first nutrient
   
-    // Function to convert various units to milligrams
-    function convertToMilligrams(amount, unit) {
-      const unitConversions = {
-        'g': 1e3,      
-        'mg': 1,       
-        'µg': 1e-3    
-      };
-  
-      return amount * unitConversions[unit] || 0;
+      return `${formattedTotalWeight} ${unit}`;
     }
+    return '0.00'; // Return '0.00' if nutritionalDetails is not available
   };
+  
   
   const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
   const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
-  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalFatWeight = calculateTotalWeight('Fat', 'Total lipid (fat)');
   const totalVitaminsWeight = calculateTotalWeight('Vitamins');
   const totalMineralsWeight = calculateTotalWeight('Minerals');
   const totalEnergy = calculateTotalWeight('Energy');
-  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalProteinWeight;
+  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalVitaminsWeight;
 
   return (
     <div className="recipe-container mt-5">
@@ -531,35 +417,35 @@ export default function Recipes() {
         </div>
         
         <div className="total-weight-section" style={{ color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-          <h2>Total Nutritional Weights</h2>
+          <h2>Nutritional Analysis</h2>
           <table className="table">
             <thead>
               <tr>
                 <th style={thStyle}>Category</th>
-                <th style={thStyle}>Weight</th>
+                <th style={thStyle}>Amount</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>Total Protein Weight</td>
+                <td>Total Protein</td>
                 <td>{totalProteinWeight} </td>
               </tr>
               <tr>
-                <td>Total Carbohydrate Weight</td>
+                <td>Total Carbohydrate</td>
                 <td>{totalCarbohydrateWeight} </td>
               </tr>
               <tr>
-                <td>Total Fat Weight</td>
+                <td>Total Fat</td>
                 <td>{totalFatWeight} </td>
               </tr>
-              <tr>
+              {/* <tr>
                 <td>Total Vitamins Weight</td>
                 <td>{totalVitaminsWeight} </td>
               </tr>
               <tr>
                 <td>Total Minerals Weight</td>
                 <td>{totalMineralsWeight} </td>
-              </tr>
+              </tr> */}
               <tr>
                 <td>Total Energy</td>
                 <td>{totalEnergy} </td>

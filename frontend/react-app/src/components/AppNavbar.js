@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import Dropdown from 'react-bootstrap/Dropdown';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FaUser } from 'react-icons/fa';
 import UserContext from '../UserContext';
@@ -13,6 +12,7 @@ export default function AppNavbar() {
   const [showProfile, setShowProfile] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
   const navigate = useNavigate();
+  const profileRef = useRef();
 
   useEffect(() => {
     // Make a request to your backend to get the user's information
@@ -26,6 +26,7 @@ export default function AppNavbar() {
         .then((response) => response.json())
         .then((userData) => {
           setUserDetails(userData); // Assuming the server returns an object with 'username' and 'email' properties
+          setShowProfile(false);
         })
         .catch((error) => {
           console.error('Error fetching user data:', error);
@@ -39,28 +40,42 @@ export default function AppNavbar() {
     
   };
 
+  const handleClickOutsideProfile = (event) => {
+    if (profileRef.current && !profileRef.current.contains(event.target)) {
+      setShowProfile(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutsideProfile);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutsideProfile);
+    };
+  }, []);
+
   return (
     <Navbar expand="lg" className="custom-navbar fixed-top">
       <Navbar.Brand as={Link} to="/" className="mx-5" style={{ color: '#fff' }}>
-        Virtual Recipe Analyzer
+        <img src="/cooking.png" alt="Icon" width="30" height="30" />
       </Navbar.Brand>
 
       <Navbar.Toggle aria-controls="basic-navbar-nav" className="custom-toggler" />
       <Navbar.Collapse id="basic-navbar-nav" style={{ color: '#fff' }}>
         <Nav className="mr-auto">
-          <Nav.Link as={NavLink} to="/" style={{ color: '#fff' }}>
+          <Nav.Link as={NavLink} to="/" style={{ color: '#fff' }} activeClassName="active">
             Home
           </Nav.Link>
-          <Nav.Link as={NavLink} to="/recipes" style={{ color: '#fff' }}>
+          <Nav.Link as={NavLink} to="/recipes" style={{ color: '#fff' }} activeClassName="active">
             Analyze
           </Nav.Link>
-          <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }}>
+          <Nav.Link as={NavLink} to="/post" style={{ color: '#fff' }} activeClassName="active">
             Recipes
           </Nav.Link>
         </Nav>
         <Nav className="ms-auto">
           {user.id ? (
-            <div className="profile-icon-container">
+            <div className="profile-icon-container" ref={profileRef}>
               <FaUser
                 onClick={handleProfileClick}
                 className="profile-icon"
@@ -83,10 +98,10 @@ export default function AppNavbar() {
             </div>
           ) : (
             <>
-              <Nav.Link as={NavLink} to="/login" style={{ color: '#fff' }}>
+              <Nav.Link as={NavLink} to="/login" style={{ color: '#fff' }} activeClassName="active">
                 Login
               </Nav.Link>
-              <Nav.Link as={NavLink} to="/register" style={{ color: '#fff' }}>
+              <Nav.Link as={NavLink} to="/register" style={{ color: '#fff' }} activeClassName="active">
                 Register
               </Nav.Link>
             </>

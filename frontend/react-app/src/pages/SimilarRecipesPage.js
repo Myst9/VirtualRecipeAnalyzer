@@ -5,7 +5,7 @@ import PostCard from '../components/PostCard';
 
 const fetchPostById = async (postId) => {
   try {
-    const response = await fetch(`http://localhost:4000/posts/${postId}`);
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/posts/${postId}`);
 
     if (!response.ok) {
       throw new Error('Failed to fetch post');
@@ -62,7 +62,7 @@ const SimilarRecipes = () => {
 
   return (
     <Container className="mt-5">
-      <h2 className="text-center mb-5" style={{ color: 'white' }}>Similar Recipes</h2>
+      <h2 className="text-center mb-5 pt-5" style={{ color: 'white' }}>Similar Recipes</h2>
       {groupedPosts.map((row, rowIndex) => (
         <Row key={rowIndex} className="mb-3">
           {row.map(post => (

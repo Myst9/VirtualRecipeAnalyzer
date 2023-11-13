@@ -38,8 +38,8 @@ export default function Home() {
     <div className="pageContainer mt-5">
       <Banner data={data} />
       
-      <div style={{ display: 'flex', alignItems: 'center', marginLeft: '35px' }}>
-        <h1 style={{ color: 'white' }}>Discover Trending Recipes</h1>
+      <div style={{ display: 'flex', alignItems: 'center', marginLeft: '24px', marginBottom:'1rem' }}>
+        <h1 style={{ color: 'white'}}>Discover Trending Recipes</h1>
         <div style={{ marginLeft: 'auto' }}>
           <Link to="/post" className="arrow-link">
             <span style={{ fontSize: '15px' }}>Discover more</span>
