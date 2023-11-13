@@ -3,8 +3,9 @@ import { Card, Col, Row, Container, Button, Toast } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark as solidBookmark, faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark, faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
+import { faShare } from '@fortawesome/free-solid-svg-icons';
 
-export default function PostCard({ post}) {
+export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
   const { userId, title, _id } = post;
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${_id}`;
@@ -29,11 +30,10 @@ export default function PostCard({ post}) {
           },
         });
 
-        const savedPosts = await response.json();
-        console.log('Saved Posts:', savedPosts); // Log the saved posts to the console
-
-        // Check if the current post is in the savedPosts list
-        const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
+      const savedPosts = await response.json();
+      
+      // Check if the current post is in the savedPosts list
+      const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
 
         // Update state with the new bookmark status
         setBookmarkStatus(isPostSaved);
@@ -96,6 +96,11 @@ export default function PostCard({ post}) {
         // Update state with the new bookmark status
         setBookmarkStatus(!bookmarkStatus);
         setShowNotification(true);
+
+        // Call the onBookmarkClick callback to remove the post from the saved posts page
+        if (onBookmarkClick) {
+          onBookmarkClick(_id);
+        }
       }
     } catch (error) {
       console.error('Bookmark request failed:', error);
@@ -134,12 +139,23 @@ export default function PostCard({ post}) {
   };
 
 
+  const sharePost = (event) => {
+    event.stopPropagation();
+    const message = `Check out this recipe ${post.title}\n${window.location.href}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <Container>
       <Row>
         <Col lg={12}>
           {/* Use a div as the clickable area, excluding the bookmark button */}
-          <div className="rounded overflow-hidden shadow position-relative" onClick={() => window.location.href = postUrl}>
+          <div
+            className="rounded overflow-hidden shadow position-relative"
+            onClick={() => (window.location.href = postUrl)}
+            style={{ cursor: 'pointer' }}
+          >
             {imageUrl && (
               <div style={{ position: 'relative', paddingTop: '75%' }}>
                 <img
@@ -189,6 +205,18 @@ export default function PostCard({ post}) {
                       icon={bookmarkStatus ? solidBookmark : regularBookmark}
                       style={{ color: 'black' }}
                     />
+                  </Button>
+                  {/* Share button */}
+                  <Button
+                    variant="outline-primary"
+                    onClick={sharePost}
+                    style={{
+                      border: 'none', // Remove border
+                      boxShadow: 'none', // Remove box shadow
+                      backgroundColor: 'transparent', // Remove background color
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
                   </Button>
                 </div>
                 <Card.Title>

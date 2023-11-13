@@ -10,6 +10,7 @@ import Post from './pages/Post';
 import AddPost from './components/AddPost';
 import PostDetails from './components/PostDetails';
 import SimilarRecipesPage from './pages/SimilarRecipesPage';
+import SavedPosts from './pages/SavedPosts';
 
 import './App.css';
 
@@ -67,6 +68,7 @@ export default function App() {
             <Route path="/addPost" element={<AddPost />} />
             <Route path="/posts/:postId" element={<PostDetails />} />
             //<Route path="/similar-recipes" element={<SimilarRecipesPage />} />
+            <Route path="/saved-posts" element={<SavedPosts />} />
             <Route path="/*" element={<Error />} />
           </Routes>
         </Container>
