@@ -5,6 +5,118 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 
+const nutrientCategories = {
+  Vitamins: [
+    'Vitamin A, RAE',
+    'Carotene, alpha',
+    'Carotene, beta',
+    'Cryptoxanthin, beta',
+    'Lutein + zeaxanthin',
+    'Lycopene',
+    'Retinol',
+    'Thiamin',
+    'Riboflavin',
+    'Niacin',
+    'Vitamin A, IU',
+    'Vitamin B-6',
+    'Vitamin B-12',
+    'Vitamin B-12, added',
+    'Folate, total',
+    'Folate, food',
+    'Folic acid',
+    'Vitamin C, total ascorbic acid',
+    'Vitamin D (D2 + D3)',
+    'Vitamin E (alpha-tocopherol)',
+    'Vitamin E, added',
+    'Tocopherol, alpha',
+    'Tocopherol, beta',
+    'Tocopherol, delta',
+    'Tocopherol, gamma',
+    'Tocotrienol, alpha',
+    'Tocotrienol, beta',
+    'Tocotrienol, delta',
+    'Tocotrienol, gamma',
+    'Vitamin K (phylloquinone)',
+    'Carotene, beta',
+    'Carotene, alpha',
+    'Cryptoxanthin, beta',
+    'Lycopene',
+    'Lutein + zeaxanthin',
+    'Choline, total',
+    'Folate, DFE',
+  ],
+  Fat: [
+    'Total lipid (fat)',
+    'Fatty acids, total saturated',
+    'SFA 4:0',
+    'SFA 6:0',
+    'SFA 8:0',
+    'SFA 10:0',
+    'SFA 12:0',
+    'SFA 14:0',
+    'SFA 16:0',
+    'SFA 18:0',
+    'Fatty acids, total monounsaturated',
+    'MUFA 16:1',
+    'MUFA 18:1',
+    'MUFA 20:1',
+    'MUFA 22:1',
+    'Fatty acids, total polyunsaturated',
+    'PUFA 18:2',
+    'PUFA 18:3',
+    'PUFA 20:4',
+    'PUFA 22:6 n-3 (DHA)',
+    'PUFA 18:4',
+    'PUFA 20:1',
+    'PUFA 20:5 n-3 (EPA)',
+    'PUFA 22:1',
+    'PUFA 22:5 n-3 (DPA)',
+  ],
+  Minerals: [
+    'Calcium, Ca',
+    'Iron, Fe',
+    'Magnesium, Mg',
+    'Phosphorus, P',
+    'Potassium, K',
+    'Sodium, Na',
+    'Zinc, Zn',
+    'Copper, Cu',
+    'Selenium, Se',
+    'Manganese, Mn'
+  ],
+  Carbohydrates: [
+    'Carbohydrate, by difference',
+    'Sugars, total including NLEA',
+    'Fiber, total dietary',
+    'Starch',
+    'Net carbs',
+  ],
+  'Proteins and Aminoacids':
+    ['Protein',
+      'Tryptophan',
+      'Threonine',
+      'Isoleucine',
+      'Leucine',
+      'Lysine',
+      'Methionine',
+      'Cystine',
+      'Phenylalanine',
+      'Tyrosine',
+      'Valine',
+      'Arginine',
+      'Histidine',
+      'Alanine',
+      'Aspartic acid',
+      'Glutamic acid',
+      'Glycine',
+      'Proline',
+      'Serine'
+    ],
+  Sterols: ['Cholesterol'],
+  Other: ['Alcohol, ethyl', 'Water', 'Caffeine', 'Theobromine'],
+  Energy: []
+};
+
 export default function PostDetails() {
   const [post, setPost] = useState(null);
   const { postId } = useParams();
@@ -21,6 +133,8 @@ export default function PostDetails() {
   const [quantityInput, setQuantityInput] = useState('');
   const [unitsOptions, setUnitsOptions] = useState([]);
   const [unit, setUnit] = useState('');
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false);
+  const [nutritionalAnalysis, setNutritionalAnalysis] = useState(null);
 
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
@@ -106,6 +220,29 @@ export default function PostDetails() {
         console.error('Error fetching units:', error);
       }
     }
+  };
+
+  const handleAnalyzeClick = () => {
+    // Make a request to fetch nutritional analysis
+    fetch(`${process.env.REACT_APP_API_URL}/recipes/analyze-recipe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({
+        ingredients: selectedIngredients,
+      }),
+    })
+      .then((response) => response.json())
+      .then((analysisData) => {
+        setNutritionalAnalysis(analysisData);
+        setShowAnalysisModal(true);
+        console.log(analysisData);
+      })
+      .catch((error) => {
+        console.error('Error fetching nutritional analysis:', error);
+      });
   };
 
   const handleIngredientSelect = (selectedOption) => {
@@ -241,6 +378,61 @@ export default function PostDetails() {
     }
   };
 
+  const categorizeNutrients = (nutrients) => {
+    const categorizedNutrients = {};
+
+    // Initialize categories
+    for (const category in nutrientCategories) {
+      categorizedNutrients[category] = [];
+    }
+
+    // Categorize nutrients
+    for (const nutrient of nutrients) {
+      let categoryFound = false;
+
+      for (const category in nutrientCategories) {
+        if (nutrientCategories[category].includes(nutrient.nutrientName)) {
+          categorizedNutrients[category].push(nutrient);
+          categoryFound = true;
+          break;
+        }
+      }
+
+      if (!categoryFound) {
+        categorizedNutrients['Energy'].push(nutrient);
+      }
+    }
+
+    return categorizedNutrients;
+  };
+
+  const categorizedNutrients = categorizeNutrients(nutritionalAnalysis || []);
+
+  const calculateTotalWeight = (category) => {
+    if (nutritionalAnalysis) {
+      const totalWeight = categorizedNutrients[category].reduce((total, detail) => {
+        // Check if nutrientAmount is a valid number
+        if (!isNaN(parseFloat(detail.nutrientAmount))) {
+          return total + parseFloat(detail.nutrientAmount);
+        }
+        return total;
+      }, 0);
+
+      const formattedTotalWeight = (Math.round(totalWeight * 100) / 100).toFixed(2);
+      const unit = categorizedNutrients[category][0].nutrientUnit; // Use the unit from the first nutrient
+
+      return `${formattedTotalWeight} ${unit}`;
+    }
+    return '0 mg'; // Return '0 mg' if nutritionalDetails is not available
+  };
+
+  const totalProteinWeight = calculateTotalWeight('Proteins and Aminoacids');
+  const totalCarbohydrateWeight = calculateTotalWeight('Carbohydrates');
+  const totalFatWeight = calculateTotalWeight('Fat');
+  const totalVitaminsWeight = calculateTotalWeight('Vitamins');
+  const totalMineralsWeight = calculateTotalWeight('Minerals');
+  const totalEnergy = calculateTotalWeight('Energy');
+
   return (
     <div className='mt-5'>
       <Container>
@@ -275,6 +467,64 @@ export default function PostDetails() {
                       <li>No ingredients available</li>
                     )}
                   </ul>
+
+                  {/* Analyze button */}
+                  <div className="text-center">
+                    <Button variant="info" onClick={handleAnalyzeClick}>
+                      Analyze
+                    </Button>
+                  </div>
+
+                  {showAnalysisModal && (
+                    <Modal show={showAnalysisModal} onHide={() => setShowAnalysisModal(false)}>
+                      <Modal.Header closeButton>
+                        <Modal.Title>Nutritional Analysis</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body>
+                        {nutritionalAnalysis ? (
+                          <div>
+                            <table className="table">
+                              <thead>
+                                <tr>
+                                  <th>Category</th>
+                                  <th>Amount</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>Total Protein</td>
+                                  <td>{totalProteinWeight} </td>
+                                </tr>
+                                <tr>
+                                  <td>Total Carbohydrate</td>
+                                  <td>{totalCarbohydrateWeight} </td>
+                                </tr>
+                                <tr>
+                                  <td>Total Fat</td>
+                                  <td>{totalFatWeight} </td>
+                                </tr>
+                                {/* <tr>
+                <td>Total Vitamins Weight</td>
+                <td>{totalVitaminsWeight} </td>
+              </tr>
+              <tr>
+                <td>Total Minerals Weight</td>
+                <td>{totalMineralsWeight} </td>
+              </tr> */}
+                                <tr>
+                                  <td>Total Energy</td>
+                                  <td>{totalEnergy} </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p>Loading nutritional analysis...</p>
+                        )}
+                      </Modal.Body>
+                    </Modal>
+                  )}
+
 
                   <Card.Subtitle>Description:</Card.Subtitle>
                   <Card.Text>{post.description}</Card.Text>

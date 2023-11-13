@@ -394,7 +394,7 @@ export default function Recipes() {
   const totalVitaminsWeight = calculateTotalWeight('Vitamins');
   const totalMineralsWeight = calculateTotalWeight('Minerals');
   const totalEnergy = calculateTotalWeight('Energy');
-  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalProteinWeight;
+  const totalWeight = totalCarbohydrateWeight+totalFatWeight+totalMineralsWeight+totalProteinWeight+totalVitaminsWeight;
 
   return (
     <div className="recipe-container mt-5">
