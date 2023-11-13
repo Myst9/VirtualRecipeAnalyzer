@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
-import Dropdown from 'react-bootstrap/Dropdown';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { FaUser } from 'react-icons/fa';
 import UserContext from '../UserContext';

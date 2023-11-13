@@ -25,6 +25,14 @@ export default function PostDetails() {
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [nutritionalAnalysis, setNutritionalAnalysis] = useState(null);
 
+  useEffect(() => {
+		document.body.style.backgroundImage = `url(/brooke-lark-1.jpg)`;
+		
+		return () => {
+		  document.body.style.backgroundImage = null;
+		};
+	  }, []);
+
   const imageUrl = `${process.env.REACT_APP_API_URL}/posts/image/${postId}`;
 
   useEffect(() => {
