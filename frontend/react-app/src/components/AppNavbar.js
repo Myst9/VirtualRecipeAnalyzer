@@ -54,6 +54,11 @@ export default function AppNavbar() {
     };
   }, []);
 
+  const handleViewSavedPosts = () => {
+    // Navigate to the SavedPosts page when the button is clicked
+    navigate('/saved-posts');
+  };
+
   return (
     <Navbar expand="lg" className="custom-navbar fixed-top">
       <Navbar.Brand as={Link} to="/" className="mx-5" style={{ color: '#fff' }}>
@@ -87,8 +92,8 @@ export default function AppNavbar() {
                   <p>
                     <strong>Email:</strong> {userDetails?.email}
                   </p>
-                  <button className="view-saved-posts" onClick={() => console.log('View Saved Posts')}>
-                    Saved Posts
+                  <button className="view-saved-posts" onClick={handleViewSavedPosts}>
+                    Saved Recipes
                   </button>
                   <button className="logout" onClick={() => navigate('/logout')}>
                     Logout
