@@ -21,6 +21,22 @@ module.exports.checkEmailExists = (reqBody) => {
 	})
 }
 
+module.exports.checkNameExists = (reqBody) => {
+	
+	return User.find({ name: reqBody.name }).then(result => {
+
+		if(result.length > 0){
+			
+			return true
+		
+		} else {
+			
+			return false
+		
+		}
+	})
+}
+
 module.exports.registerUser = (reqBody) => {
 
 	let newUser = new User({
@@ -79,3 +95,42 @@ module.exports.getProfile = (data) => {
 		}
 	})
 }
+
+module.exports.bookmarkPost = async (data) => {
+  try {
+    const { userId, postId, remove } = data;
+
+    const updateOperation = remove ? '$pull' : '$addToSet';
+    const updateQuery = { [updateOperation]: { savedPosts: postId } };
+
+    const result = await User.findByIdAndUpdate(userId, updateQuery, { new: true });
+
+    if (!result) {
+      return false; // User not found or other error
+    }
+
+    result.password = '';
+    return result;
+  } catch (error) {
+    console.error('Bookmark post error:', error);
+    throw error;
+  }
+};
+
+module.exports.removeSavedPost = async (data) => {
+  try {
+    const { userId, postId } = data;
+
+    const result = await User.findByIdAndUpdate(userId, { $pull: { savedPosts: postId } }, { new: true });
+
+    if (!result) {
+      return false; // User not found or other error
+    }
+
+    result.password = '';
+    return result;
+  } catch (error) {
+    console.error('Remove saved post error:', error);
+    throw error;
+  }
+};

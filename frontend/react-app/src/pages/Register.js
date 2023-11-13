@@ -6,10 +6,9 @@ import Swal from 'sweetalert2';
 import UserContext from '../UserContext';
 
 export default function Register() {
-
-useEffect(() => {
+  useEffect(() => {
     document.body.style.backgroundImage = `url(/jay.jpg)`;
-    
+
     return () => {
       document.body.style.backgroundImage = null;
     };
@@ -26,25 +25,22 @@ useEffect(() => {
   const retrieveUserDetails = (token) => {
     fetch(`${process.env.REACT_APP_API_URL}/users/details`, {
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     })
-    .then(res => res.json())
-    .then(data => {
-      //console.log(data);
-
-      // Global user state for validation across the whole project
-      // Changes the global "user" state to store the "id" and the "isAdmin" property of the user which will be used for validation across the whole application.
-      setUser({
-        id: data._id,
-        isAdmin: data.isAdmin
-      })
-    })
-  }
+      .then((res) => res.json())
+      .then((data) => {
+        setUser({
+          id: data._id,
+          isAdmin: data.isAdmin,
+        });
+      });
+  };
 
   function registerUser(e) {
     e.preventDefault();
 
+    // Check for duplicate email
     fetch(`${process.env.REACT_APP_API_URL}/users/checkEmail`, {
       method: 'POST',
       headers: {
@@ -55,87 +51,104 @@ useEffect(() => {
       }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data === true) {
+      .then((emailCheck) => {
+        if (emailCheck === true) {
           Swal.fire({
             title: 'Duplicate email found',
             icon: 'error',
             text: 'Please provide a different email.',
           });
         } else {
-          fetch(`${process.env.REACT_APP_API_URL}/users/register`, {
+          // Check for duplicate name
+          fetch(`${process.env.REACT_APP_API_URL}/users/checkName`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
               name: name,
-              email: email,
-              password: password1,
             }),
           })
             .then((res) => res.json())
-            .then((data) => {
-              if (data === true) {
-                
-
-                
-
-                // Now, make a login request after successful registration
-                fetch(`${process.env.REACT_APP_API_URL}/users/login`, {
+            .then((nameCheck) => {
+              if (nameCheck === true) {
+                Swal.fire({
+                  title: 'User name in use',
+                  icon: 'error',
+                  text: 'Please provide a different user name.',
+                });
+              } else {
+                // If both email and name are unique, proceed with registration
+                fetch(`${process.env.REACT_APP_API_URL}/users/register`, {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
+                    name: name,
                     email: email,
                     password: password1,
                   }),
                 })
                   .then((res) => res.json())
-                  .then(data => {
-                    //console.log(data);
-
-                    if(typeof data.access !== 'undefined'){
-                      //console.log(data.access)
-                      localStorage.setItem('token', data.access);
-                      setUser({
-                              id: data.id, 
-                              isAdmin: data.isAdmin,
-                          });
-                      retrieveUserDetails(data.access);
-
-                      Swal.fire({
-                        title: "Registration Successful",
-                        icon: "success",
-                        text: "Welcome to Virtual Recipe Store!"
+                  .then((data) => {
+                    if (data === true) {
+                      // Now, make a login request after successful registration
+                      fetch(`${process.env.REACT_APP_API_URL}/users/login`, {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          email: email,
+                          password: password1,
+                        }),
                       })
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (typeof data.access !== 'undefined') {
+                            localStorage.setItem('token', data.access);
+                            setUser({
+                              id: data.id,
+                              isAdmin: data.isAdmin,
+                            });
+                            retrieveUserDetails(data.access);
+
+                            Swal.fire({
+                              title: 'Registration Successful',
+                              icon: 'success',
+                              text: 'Welcome to Virtual Recipe Store!',
+                            });
+                          } else {
+                            Swal.fire({
+                              title: 'Authentication Failed',
+                              icon: 'error',
+                              text: 'Please check your details and try again!',
+                            });
+                          }
+                        });
                     } else {
                       Swal.fire({
-                        title: "Authentication Failed",
-                        icon: "error",
-                        text: "Please check your details and try again!"
-                      })
+                        title: 'Something went wrong',
+                        icon: 'error',
+                        text: 'Please try again.',
+                      });
                     }
-                  })
-              } else {
-                Swal.fire({
-                  title: 'Something went wrong',
-                  icon: 'error',
-                  text: 'Please try again.',
-                });
+                  });
               }
             });
-            setName('');
-                setEmail('');
-                setPassword1('');
-                setPassword2('');
         }
       });
   }
 
   useEffect(() => {
-    if (name !== '' && email !== '' && password1 !== '' && password2 !== '' && password1 === password2) {
+    if (
+      name !== '' &&
+      email !== '' &&
+      password1 !== '' &&
+      password2 !== '' &&
+      password1 === password2
+    ) {
       setIsActive(true);
     } else {
       setIsActive(false);
@@ -143,7 +156,14 @@ useEffect(() => {
   }, [name, email, password1, password2]);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+      }}
+    >
       <Container>
         <Row>
           <Col lg={{ span: 6, offset: 3 }}>

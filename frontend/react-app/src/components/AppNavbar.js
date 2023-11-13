@@ -35,6 +35,8 @@ export default function AppNavbar() {
 
   const handleProfileClick = () => {
     setShowProfile(!showProfile);
+    
+    
   };
 
   return (
