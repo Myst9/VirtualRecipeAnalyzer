@@ -141,10 +141,42 @@ export default function PostDetails() {
     }
   };
 
-  const shareViaWhatsApp = () => {
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  const toggleShareModal = (event) => {
+    event.stopPropagation();
+    setShowShareModal(!showShareModal);
+  };
+
+  const sharePost = (platform) => {
+    let shareUrl = '';
+
     const message = `Check out this recipe ${post.title}\n${window.location.href}`;
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+
+    switch (platform) {
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+        break;
+      case 'instagram':
+        shareUrl = `https://www.instagram.com/${encodeURIComponent(message)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&via=${encodeURIComponent(message)}`;
+        break;
+      default:
+        break;
+    }
+
+    window.open(shareUrl, '_blank');
+    setShowShareModal(false);
+  };
+
+
+
+  const handleCloseModal = () => {
+
+    setShowShareModal(false);
+
   };
   const handleAnalyzeClick = () => {
     // Make a request to fetch nutritional analysis
@@ -376,19 +408,58 @@ export default function PostDetails() {
                     </div>
                   )}
 
-                  <div
-                    style={{
-                      position: 'absolute',
-                      // top: '10px',
-                      right: '20px',
-                      zIndex: 1,
-                      padding: '10px',
-                      cursor: 'pointer',
-                    }}
-                    onClick={shareViaWhatsApp}
-                  >
-                    <FontAwesomeIcon icon={faShare} />
+                  <div>
+                    <Button
+                      variant="outline-primary"
+                      onClick={toggleShareModal}
+                      style={{
+                        border: 'none',
+                        boxShadow: 'none',
+                        backgroundColor: 'transparent',
+                        marginTop: '10px',
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
+                      <span className="ms-1" style={{ color: 'black' }}>Share</span>
+                    </Button>
                   </div>
+
+                  <Modal show={showShareModal} onHide={handleCloseModal} centered >
+                    <Modal.Header closeButton>
+                      <Modal.Title>Share on</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                      <Container>
+                        <Row className="justify-content-around">
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('whatsapp')}
+                            >
+                              WhatsApp
+                            </Button>
+                          </Col>
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('instagram')}
+                            >
+                              Instagram
+                            </Button>
+                          </Col>
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('twitter')}
+                            >
+                              Twitter
+                            </Button>
+                          </Col>
+                        </Row>
+                      </Container>
+                    </Modal.Body>
+
+                  </Modal>
 
                   <h4 className="text-center mb-4">{post.title}</h4>
                   <Card.Subtitle>Posted by:</Card.Subtitle>
@@ -590,7 +661,7 @@ export default function PostDetails() {
           <Col lg={{ span: 6, offset: 3 }}>
             <Card.Subtitle className="mt-4 text-white" style={{ fontSize: '1.5rem' }}>Comments:</Card.Subtitle>
 
-            {/* Render your comment form component here */}
+            {}
             <CommentForm postId={postId} user={user} setComments={setComments} />
 
             {/* Display comments */}

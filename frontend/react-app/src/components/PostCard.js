@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Col, Row, Container, Button, Toast } from 'react-bootstrap';
+import { Card, Col, Row, Container, Button, Toast, Modal } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark as solidBookmark, faHeart as solidHeart } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as regularBookmark, faHeart as regularHeart } from '@fortawesome/free-regular-svg-icons';
@@ -12,7 +12,7 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
   const postUrl = `/posts/${_id}`;
 
   const [bookmarkStatus, setBookmarkStatus] = useState(false); // Initialize as false by default
-  const [likeStatus, setLikeStatus] = useState(false); 
+  const [likeStatus, setLikeStatus] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likes);
 
 
@@ -30,10 +30,10 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
           },
         });
 
-      const savedPosts = await response.json();
-      
-      // Check if the current post is in the savedPosts list
-      const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
+        const savedPosts = await response.json();
+
+        // Check if the current post is in the savedPosts list
+        const isPostSaved = savedPosts.some(savedPost => savedPost._id === _id);
 
         // Update state with the new bookmark status
         setBookmarkStatus(isPostSaved);
@@ -55,23 +55,23 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
-  
+
         const likes = await response.json();
         console.log('Liked Posts:', likes); // Log the liked posts to the console
-  
+
         // Check if the current post is in the likedPosts list
         const isPostLiked = likes.some((likedPost) => likedPost._id === _id);
-  
+
         // Update state with the new like status
         setLikeStatus(isPostLiked);
       } catch (error) {
         console.error('Error fetching liked posts:', error);
       }
     };
-  
+
     fetchLikedPosts();
   }, [userId, _id]);
-  
+
 
   const handleBookmarkClick = async (event) => {
     event.stopPropagation();
@@ -130,24 +130,55 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
       if (data) {
         // Update state with the new like status
         setLikeStatus(!likeStatus);
-      
+
         // Adjust the like count based on the current like status
         setLikeCount(prevLikeCount => (likeStatus ? prevLikeCount - 1 : prevLikeCount + 1));
-      
+
         setShowNotification(true);
       }
-      
+
     } catch (error) {
       console.error('Like request failed:', error);
     }
   };
 
+  const [showShareModal, setShowShareModal] = useState(false);
 
-  const sharePost = (event) => {
+  const toggleShareModal = (event) => {
     event.stopPropagation();
-    const message = `Check out this recipe ${post.title}\n${window.location.href}`;
-    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    setShowShareModal(!showShareModal);
+  };
+
+  const sharePost = (platform) => {
+    let shareUrl = '';
+    let message = `Check out this recipe ${post.title}\n`;
+
+    const postShareUrl = `${window.location.origin}/posts/${_id}`;
+
+    switch (platform) {
+      case 'whatsapp':
+        shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message + postShareUrl)}`;
+        break;
+      case 'instagram':
+        shareUrl = `https://www.instagram.com/${encodeURIComponent(message + postShareUrl)}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message + postShareUrl)}&via=${encodeURIComponent(message)}`;
+        break;
+      default:
+        break;
+    }
+
+    window.open(shareUrl, '_blank');
+    setShowShareModal(false);
+  };
+
+
+
+  const handleCloseModal = () => {
+ 
+    setShowShareModal(false);
+
   };
 
   return (
@@ -215,16 +246,60 @@ export default function PostCard({ post, isBookmarked, onBookmarkClick }) {
                   <div>
                     <Button
                       variant="outline-primary"
-                      onClick={sharePost}
+                      onClick={toggleShareModal}
                       style={{
                         border: 'none',
                         boxShadow: 'none',
                         backgroundColor: 'transparent',
+                        marginTop: '10px', 
                       }}
                     >
                       <FontAwesomeIcon icon={faShare} style={{ color: 'black' }} />
+                      <span className="ms-1" style={{ color: 'black' }}>Share</span>
                     </Button>
                   </div>
+
+                  <Modal show={showShareModal} onHide={handleCloseModal} centered >
+                  <Modal.Header closeButton onClick={(event) => {
+  event.stopPropagation();
+  setShowShareModal(false);
+}}>
+  <Modal.Title>Share on</Modal.Title>
+</Modal.Header>
+
+                    <Modal.Body>
+                      <Container>
+                        <Row className="justify-content-around">
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('whatsapp')}
+                            >
+                              WhatsApp
+                            </Button>
+                          </Col>
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('instagram')}
+                            >
+                              Instagram
+                            </Button>
+                          </Col>
+                          <Col xs="auto">
+                            <Button
+                              variant="outline-primary"
+                              onClick={() => sharePost('twitter')}
+                            >
+                              Twitter
+                            </Button>
+                          </Col>
+                        </Row>
+                      </Container>
+                    </Modal.Body>
+
+                  </Modal>
+
                 </div>
                 <Card.Title>
                   <h4 className="text-center">{title}</h4>
